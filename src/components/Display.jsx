@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Button,InputGroup, FormControl} from 'react-bootstrap';
-import logo from '../logo.png';
 import './App.css';
 import Web3 from 'web3';
 import { erc20abi , abi } from './abi';
@@ -35,6 +34,8 @@ class Display extends Component {
         uni_sell : 0,
         sushi_buy : 0,
         sushi_sell : 0,
+        uni2sushiRate : 0,
+        sushi2uniRate : 0,
         tableDatas : [],
         tableData : [],
         inputAddress : "",
@@ -43,9 +44,12 @@ class Display extends Component {
     }
 
     async componentWillMount() {
-        this.loadAddresses()
-    }
 
+        this.loadAddresses()
+    
+    }
+    async componentDidMount() {
+    }
     async loadAddresses(){
       database.ref('TokenAddress/').get().then((snapshot) => {
         if (snapshot.exists) {
@@ -63,7 +67,7 @@ class Display extends Component {
             this.setState({
               tokenAddresses : walletList
             })
-            console.log("load ", this.state.tokenAddresses)
+            this.start()
         }
       });
     }
@@ -99,6 +103,24 @@ class Display extends Component {
 
       let uni2sushiRate = Math.round((sushi_sell - uni_buy) * 100000 / sushi_sell) /1000
       let sushi2uniRate = Math.round(( uni_sell - sushi_buy) * 100000/ uni_sell)/1000
+      let uni2sushiRateStyle 
+      let sushi2uniRateStyle
+
+      if (uni2sushiRate >= 0){
+         uni2sushiRateStyle     = <a className='text-success'> {uni2sushiRate} </a>
+      }
+      else if (uni2sushiRate < 0){
+         uni2sushiRateStyle     = <a className='text-danger'> {uni2sushiRate} </a>
+      }
+
+      if (sushi2uniRate >= 0){
+         sushi2uniRateStyle     = <a className='text-success'> {sushi2uniRate} </a>
+      }
+      else if (sushi2uniRate < 0){
+         sushi2uniRateStyle     = <a className='text-danger'> {sushi2uniRate} </a>
+      }
+   
+
 
       let tableData = {
         tokenName     : tokenName,
@@ -109,6 +131,8 @@ class Display extends Component {
         sushi_sell    : sushi_sell,
         uni2sushiRate : uni2sushiRate,
         sushi2uniRate : sushi2uniRate,
+        uni2sushiRateStyle : uni2sushiRateStyle,
+        sushi2uniRateStyle : sushi2uniRateStyle
       }
 
       let tableDatas = this.state.tableDatas
@@ -140,6 +164,8 @@ class Display extends Component {
 
         var rows = this.state.tableDatas
 
+
+
         const data = {
           columns : [
             {
@@ -156,7 +182,7 @@ class Display extends Component {
             },
             {
                 label : 'rate',
-                field : 'uni2sushiRate',
+                field : 'uni2sushiRateStyle',
             },
             {
                 label : 'sushi buy price',
@@ -168,7 +194,7 @@ class Display extends Component {
             },
             {
                 label : 'Rate',
-                field : 'sushi2uniRate',
+                field : 'sushi2uniRateStyle',
             },
           ],
           rows : rows,
@@ -201,9 +227,7 @@ class Display extends Component {
                   <Button variant="primary" id="button-addon2"  onClick={()=>this.addAddress()}>
                     Add Token Address
                   </Button>
-                  <Button variant="primary" id="button-addon2"  onClick={()=>this.start()}>
-                    Get Price
-                  </Button>
+
                 </InputGroup>
                 </div>
               <div className = "col-1"></div>
