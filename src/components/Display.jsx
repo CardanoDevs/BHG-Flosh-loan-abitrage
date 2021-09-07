@@ -30,6 +30,11 @@ const pancake_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
 const usdt_address   = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
 
 
+// const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
+// const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
+// const pancake_address = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
+// const usdt_address    = '0xd0a1e359811322d97991e03f863a0c30c2cf029c'
+
 class Display extends Component {
     constructor(props){
       super(props)
@@ -61,7 +66,7 @@ class Display extends Component {
     async componentDidMount() {
       this.timerID = setInterval(
         () => this.start(),
-        10000
+        1000
       );
 
   }
@@ -72,7 +77,7 @@ class Display extends Component {
             var walletList = [];
             const newArray = snapshot.val();
             if (newArray) {
-                Object.keys(newArray).map((key, index) => {
+                Object.keys(newArray).map((key) => {
                     const value = newArray[key];
 
                     walletList.push({

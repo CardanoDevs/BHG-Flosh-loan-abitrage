@@ -1,7 +1,7 @@
 import React, {Component, useState} from 'react';
 import { InputGroup, FormControl, Button, Modal} from 'react-bootstrap';
 import { MDBDataTable } from 'mdbreact';
-import { database,  auth } from './firebase/firebase';
+import { database} from './firebase/firebase';
 
 
 
