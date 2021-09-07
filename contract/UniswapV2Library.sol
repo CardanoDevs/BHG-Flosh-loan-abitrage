@@ -2,7 +2,7 @@ pragma solidity >=0.6.6;
 
 
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "./math/SafeMath.sol";
 
 pragma solidity >=0.6.6;
 
