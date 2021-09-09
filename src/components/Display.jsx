@@ -24,16 +24,16 @@ const options = {
 };
 
 //const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://purple-wispy-flower.quiknode.pro/a2ae460515f061ce64f526edcb10eda275f62585/', options));
-// const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
-// const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-// const pancake_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
-// const usdt_address   = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
-
-
-const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
+const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-const pancake_address = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
-const usdt_address    = '0xd0a1e359811322d97991e03f863a0c30c2cf029c'
+const sushi_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
+const Eth_address   = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+
+
+// const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
+// const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
+// const sushi_address   = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
+// const Eth_address    = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 
 class Display extends Component {
     constructor(props){
@@ -72,7 +72,7 @@ class Display extends Component {
   }
 
     async loadAddresses(){
-      database.ref('KovanTokenAddress/').get().then((snapshot) => {
+      database.ref('TokenAddress/').get().then((snapshot) => {
         if (snapshot.exists) {
             var walletList = [];
             const newArray = snapshot.val();
@@ -101,32 +101,35 @@ class Display extends Component {
         let tokenDecimal = await tokenContract.methods.decimals().call()
     
         let mycontract1  = new web3.eth.Contract(abi, uniswap_address)
-        let uni_buy      = await mycontract1.methods.getAmountsOut(1000000,[usdt_address,this.state.tokenAddresses[index]["Address"]]).call();
-        let uni_sell     = await mycontract1.methods.getAmountsOut(Math.pow(10, 15), [this.state.tokenAddresses[index]["Address"],usdt_address]).call();
-        uni_buy          = Math.round(Math.pow(10, tokenDecimal+3) /uni_buy[1]) /1000  
-        uni_sell         = Math.round(uni_sell[1]) /1000
-  
-        let mycontract2  = new web3.eth.Contract(abi, pancake_address)
-        let sushi_buy    = await mycontract2.methods.getAmountsOut(1000000 , [usdt_address,this.state.tokenAddresses[index]["Address"]]).call();
-        let sushi_sell   = await mycontract2.methods.getAmountsOut(Math.pow(10, 15) , [this.state.tokenAddresses[index]["Address"],usdt_address]).call();
-        sushi_buy        = Math.round(Math.pow(10, tokenDecimal+3) / sushi_buy[1] ) /1000
-        sushi_sell       = Math.round(sushi_sell[1]) / 1000
-  
-        let uni2sushiRate = Math.round((sushi_sell - uni_buy) * 100000 / sushi_sell) /1000
-        let sushi2uniRate = Math.round(( uni_sell - sushi_buy) * 100000/ uni_sell)/1000
+        let uni_buy      = await mycontract1.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
+        let uni_sell     = await mycontract1.methods.getAmountsOut(Math.pow(10, 15), [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
+        uni_buy          = Math.round(uni_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
+        uni_sell         = Math.round( Math.pow(10, tokenDecimal) / uni_sell[1] ) /1000
+
+        let mycontract2  = new web3.eth.Contract(abi, sushi_address)
+        let sushi_buy      = await mycontract2.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
+        let sushi_sell   = await mycontract2.methods.getAmountsOut(Math.pow(10, 15) , [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
+        sushi_buy          = Math.round(sushi_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
+        sushi_sell       = Math.round( Math.pow(10, tokenDecimal)  / sushi_sell[1] ) /1000
+
+        let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 1000/sushi_sell) /1000
+        let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 1000/uni_sell)/1000
         let uni2sushiRateStyle 
         let sushi2uniRateStyle
 
+
+
         if (uni2sushiRate >= 0){
            uni2sushiRateStyle     = <a className='text-success'> {uni2sushiRate} </a>
-           
-           this.setState({
-             tradetoken : tokenName,
-             tradebuyprice : uni_buy,
-             tradesellprice : sushi_sell,
-             traderate : uni2sushiRate,
-             showstate : true
-           })
+           if(uni2sushiRate > this.state.traderate){
+            this.setState({
+              tradetoken : tokenName,
+              tradebuyprice : uni_buy,
+              tradesellprice : sushi_sell,
+              traderate : uni2sushiRate,
+            })
+           }
+
         }
         else if (uni2sushiRate < 0){
            uni2sushiRateStyle     = <a className='text-danger'> {uni2sushiRate} </a>
@@ -134,13 +137,15 @@ class Display extends Component {
   
         if (sushi2uniRate >= 0){
            sushi2uniRateStyle     = <a className='text-success'> {sushi2uniRate} </a>
-           this.setState({
-            tradetoken : tokenName,
-            tradebuyprice : sushi_buy,
-            tradesellprice : uni_sell,
-            traderate : sushi2uniRate,
-            showstate : true
-          })
+           if(sushi2uniRate > this.state.traderate){
+            this.setState({
+              tradetoken : tokenName,
+              tradebuyprice : sushi_buy,
+              tradesellprice : uni_sell,
+              traderate : sushi2uniRate,
+            })
+           }
+
         }
         else if (sushi2uniRate < 0){
            sushi2uniRateStyle     = <a className='text-danger'> {sushi2uniRate} </a>
@@ -185,7 +190,7 @@ class Display extends Component {
       const tokenAddressList= {
         Address   : web3.utils.toChecksumAddress(this.state.inputAddress),
       }
-      var userListRef = database.ref('KovanTokenAddress')
+      var userListRef = database.ref('TokenAddress')
       var newUserRef = userListRef.push();
       newUserRef.set(tokenAddressList);
       let buffer = ''
@@ -282,7 +287,7 @@ class Display extends Component {
                     defaultValue = {this.state.contractAddress}
                   />
                   <Button variant="primary" id="button-addon2"  onClick={()=>this.addAddress()}>
-                  <FiCloudLightning/> Excute Trading
+                  <FiCloudLightning/> Excute Trading 
                  </Button>
             </InputGroup>
             </div></div>
