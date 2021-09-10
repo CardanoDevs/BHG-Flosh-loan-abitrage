@@ -56,20 +56,26 @@ class Display extends Component {
         sushi2uniRate : 0,
         tableDatas : [],
         tableData : [],
+
+
         inputAddress : "",
         tokenAddresses : [],
+
         tradetoken : '',
         tradebuyprice : 0,
         tradesellprice : 0,
-        traderate : 0,
-        showstate : false,
+        traderate       : 0,
+
         log : '',
         loanTokenAddress : '',
         loanAmount : '',
         connectedAddress : '',
+
+        logTimestamp : '',
+        logList : '',
+        direction : true,
       }
     }
-
     async componentWillMount() {
         this.loadAddresses()
         clearInterval(this.timerID);
@@ -174,7 +180,7 @@ class Display extends Component {
       }
     }
     async addAddress(){
-      console.log(this.state.inputAddress)
+
       if(this.state.inputAddress==""){
         alert("Please check  Address")
         return
@@ -201,14 +207,30 @@ class Display extends Component {
       this.loadAddresses();
     }
     async excute(){
+
       const clientWeb3    = window.web3;
       let loanContract  = await clientWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
-      
+      /*
       await loanContract.methods.flashloan(this.state.tradetoken, this.state.loanAmount, this.state.direction ).send({
         from : ownerAddress,
         gasValue : window.web3.utils.toWei('20', 'Gwei'),
         gas : 300000,
-    })
+    })*/
+
+    const logList= {
+      timeStamp  : new Date().toISOString(),
+      loanAmount : this.state.loanAmount,
+      tradeToken : this.state.tradetoken,
+      tradeRate  : this.state.traderate,
+      direction  : this.state.direction,
+    }
+
+    var userListRef = database.ref('log')
+    var newUserRef = userListRef.push();
+    newUserRef.set(logList);
+    let buffer = ''
+    this.setState({logList : buffer})
+    alert("input successfuly")
     }
 
 
@@ -302,8 +324,8 @@ class Display extends Component {
             <div className = "col-10">
             <InputGroup className="mb-3">
             <FormControl
-                    placeholder="Smart contract address"
-                    aria-label="Smart contract address"
+                    placeholder="Loan Amount"
+                    aria-label="Loan Amount"
                     aria-describedby="basic-addon2"
                     defaultValue = {this.state.loanAmount}
                     onChange={handleLoanAmount}
