@@ -71,32 +71,6 @@ class Display extends Component {
     }
 
     async componentWillMount() {
-      if(window.ethereum) {
-        window.web3 = new Web3(window.ethereum)
-        await window.ethereum.enable()
-        } else if(window.web3) {
-            window.web3 = new Web3(window.web3.currentProvider)
-        } else {
-            window.alert('Non-Ethereum browser detected. Your should consider trying MetaMask!')
-        }
-          const isMetaMaskInstalled = () => {
-            const { ethereum } = window;
-            return Boolean(ethereum && ethereum.isMetaMask);
-          };
-          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-          this.setState({
-              connectedAddress : accounts
-          })
-          window.ethereum.on('accountsChanged', (accounts) => {
-              this.setState({
-                  connectedAddress : accounts
-              })
-        });
-        const account  = await web3.eth.getAccounts();
-        this.setState({
-          accounts : account
-        })
-        console.log("this is a connected address", this.state.accounts)
         this.loadAddresses()
         clearInterval(this.timerID);
     }
