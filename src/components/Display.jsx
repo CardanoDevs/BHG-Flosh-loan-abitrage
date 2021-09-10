@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 import { Button,InputGroup, FormControl} from 'react-bootstrap';
 import './App.css';
 import Web3 from 'web3';
-import { erc20abi , abi } from './abi';
+import { erc20abi , abi ,smartcontractabi} from './abi';
 import { MDBDataTableV5 } from 'mdbreact';
 import { database,  } from './firebase/firebase';
 import { FiMonitor , FiPlus , FiCloudLightning ,FiDollarSign } from "react-icons/fi";
-
+import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 
 
 const options = {
@@ -23,7 +23,7 @@ const options = {
   },
 };
 
-//const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://purple-wispy-flower.quiknode.pro/a2ae460515f061ce64f526edcb10eda275f62585/', options));
+// const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://purple-wispy-flower.quiknode.pro/a2ae460515f061ce64f526edcb10eda275f62585/', options));
 const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 const sushi_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
@@ -34,6 +34,15 @@ const Eth_address   = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 // const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 // const sushi_address   = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
 // const Eth_address    = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+
+
+
+// const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
+// const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
+// const sushi_address   = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
+// const Eth_address     = '0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD'
+const ownerAddress = ""
+const smartContractAddress = '0xdE026BCa0e9125c35a05cdCB1cBC276fe6A9696f'
 
 class Display extends Component {
     constructor(props){
@@ -54,11 +63,40 @@ class Display extends Component {
         tradesellprice : 0,
         traderate : 0,
         showstate : false,
-        log : ''
+        log : '',
+        loanTokenAddress : '',
+        loanAmount : '',
+        connectedAddress : '',
       }
     }
 
     async componentWillMount() {
+      if(window.ethereum) {
+        window.web3 = new Web3(window.ethereum)
+        await window.ethereum.enable()
+        } else if(window.web3) {
+            window.web3 = new Web3(window.web3.currentProvider)
+        } else {
+            window.alert('Non-Ethereum browser detected. Your should consider trying MetaMask!')
+        }
+          const isMetaMaskInstalled = () => {
+            const { ethereum } = window;
+            return Boolean(ethereum && ethereum.isMetaMask);
+          };
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+          this.setState({
+              connectedAddress : accounts
+          })
+          window.ethereum.on('accountsChanged', (accounts) => {
+              this.setState({
+                  connectedAddress : accounts
+              })
+        });
+        const account  = await web3.eth.getAccounts();
+        this.setState({
+          accounts : account
+        })
+        console.log("this is a connected address", this.state.accounts)
         this.loadAddresses()
         clearInterval(this.timerID);
     }
@@ -70,7 +108,6 @@ class Display extends Component {
       );
 
   }
-
     async loadAddresses(){
       database.ref('TokenAddress/').get().then((snapshot) => {
         if (snapshot.exists) {
@@ -92,15 +129,13 @@ class Display extends Component {
         }
       });
     }
-
     async start (){
-      
       for (let index = 0; index < this.state.tokenAddresses.length; index++) {
         let tokenContract= new web3.eth.Contract(erc20abi,this.state.tokenAddresses[index]["Address"]);
         let tokenName    = await tokenContract.methods.symbol().call().then(function(res) {  return res;  })
         let tokenDecimal = await tokenContract.methods.decimals().call()
-    
         let mycontract1  = new web3.eth.Contract(abi, uniswap_address)
+
         let uni_buy      = await mycontract1.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
         let uni_sell     = await mycontract1.methods.getAmountsOut(Math.pow(10, 15), [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
         uni_buy          = Math.round(uni_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
@@ -108,17 +143,13 @@ class Display extends Component {
 
         let mycontract2  = new web3.eth.Contract(abi, sushi_address)
         let sushi_buy      = await mycontract2.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
-        let sushi_sell   = await mycontract2.methods.getAmountsOut(Math.pow(10, 15) , [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
+        let sushi_sell     = await mycontract2.methods.getAmountsOut(Math.pow(10, 15) , [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
         sushi_buy          = Math.round(sushi_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
         sushi_sell       = Math.round( Math.pow(10, tokenDecimal)  / sushi_sell[1] ) /1000
-
-        let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 1000/sushi_sell) /1000
-        let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 1000/uni_sell)/1000
+        let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 1000/sushi_sell) /10
+        let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 1000/uni_sell)/10
         let uni2sushiRateStyle 
         let sushi2uniRateStyle
-
-
-
         if (uni2sushiRate >= 0){
            uni2sushiRateStyle     = <a className='text-success'> {uni2sushiRate} </a>
            if(uni2sushiRate > this.state.traderate){
@@ -127,14 +158,13 @@ class Display extends Component {
               tradebuyprice : uni_buy,
               tradesellprice : sushi_sell,
               traderate : uni2sushiRate,
+              direction : true
             })
            }
-
         }
         else if (uni2sushiRate < 0){
            uni2sushiRateStyle     = <a className='text-danger'> {uni2sushiRate} </a>
         }
-  
         if (sushi2uniRate >= 0){
            sushi2uniRateStyle     = <a className='text-success'> {sushi2uniRate} </a>
            if(sushi2uniRate > this.state.traderate){
@@ -143,14 +173,13 @@ class Display extends Component {
               tradebuyprice : sushi_buy,
               tradesellprice : uni_sell,
               traderate : sushi2uniRate,
+              direction : false
             })
            }
-
         }
         else if (sushi2uniRate < 0){
            sushi2uniRateStyle     = <a className='text-danger'> {sushi2uniRate} </a>
         }
-    
         let tableData = {
           tokenName     : tokenName,
           tokenDecimal  : tokenDecimal,
@@ -170,7 +199,6 @@ class Display extends Component {
         })
       }
     }
-
     async addAddress(){
       console.log(this.state.inputAddress)
       if(this.state.inputAddress==""){
@@ -198,7 +226,16 @@ class Display extends Component {
       alert("input successfuly")
       this.loadAddresses();
     }
-
+    async excute(){
+      const clientWeb3    = window.web3;
+      let loanContract  = await clientWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
+      
+      await loanContract.methods.flashloan(this.state.tradetoken, this.state.loanAmount, this.state.direction ).send({
+        from : ownerAddress,
+        gasValue : window.web3.utils.toWei('20', 'Gwei'),
+        gas : 300000,
+    })
+    }
 
 
 
@@ -249,6 +286,16 @@ class Display extends Component {
           })
           console.log(this.state.inputAddress)
         }
+
+
+        const handleLoanAmount = (e) => {
+          let addLabel  = e.target.value
+          this.setState({
+            loanAmount : addLabel
+          })
+        }
+
+
         
         return (
           <div>
@@ -284,11 +331,12 @@ class Display extends Component {
                     placeholder="Smart contract address"
                     aria-label="Smart contract address"
                     aria-describedby="basic-addon2"
-                    defaultValue = {this.state.contractAddress}
-                  />
-                  <Button variant="primary" id="button-addon2"  onClick={()=>this.addAddress()}>
-                  <FiCloudLightning/> Excute Trading 
-                 </Button>
+                    defaultValue = {this.state.loanAmount}
+                    onChange={handleLoanAmount}
+            />
+            <Button variant="primary" id="button-addon2"  onClick={()=>this.excute()}>
+            <FiCloudLightning/> Excute Trading 
+            </Button>
             </InputGroup>
             </div></div>
             <br/><br/><br/>
