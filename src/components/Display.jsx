@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { Button,InputGroup, FormControl} from 'react-bootstrap';
+import { Button,InputGroup, FormControl, Modal} from 'react-bootstrap';
 import './App.css';
 import Web3 from 'web3';
 import { erc20abi , abi ,smartcontractabi} from './abi';
 import { MDBDataTableV5 } from 'mdbreact';
 import { database,  } from './firebase/firebase';
-import { FiMonitor , FiPlus , FiCloudLightning ,FiDollarSign } from "react-icons/fi";
+import { FiMonitor , FiPlus , FiCloudLightning ,FiDollarSign, FiUserPlus   } from "react-icons/fi";
+import { FaRegHandPointer } from "react-icons/fa"
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 
 
@@ -41,13 +42,14 @@ const Eth_address   = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 // const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 // const sushi_address   = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
 // const Eth_address     = '0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD'
-const ownerAddress = ""
 const smartContractAddress = '0xdE026BCa0e9125c35a05cdCB1cBC276fe6A9696f'
 
 class Display extends Component {
     constructor(props){
       super(props)
       this.state={
+
+        // capture parameter
         uni_buy : 0,
         uni_sell : 0,
         sushi_buy : 0,
@@ -57,23 +59,35 @@ class Display extends Component {
         tableDatas : [],
         tableData : [],
 
-
+        // input token
         inputAddress : "",
         tokenAddresses : [],
 
+        // trading parameter
         tradetoken : '',
         tradebuyprice : 0,
         tradesellprice : 0,
         traderate       : 0,
-
         log : '',
         loanTokenAddress : '',
         loanAmount : '',
-        connectedAddress : '',
-
         logTimestamp : '',
         logList : '',
         direction : true,
+        // auto start
+        modalShowState :  false,
+        autoProfit : 100,
+        autoAmount : 1,
+        autoTime   : 100000,
+        autoSlippage  : 100,
+        autoGasLimit  : 500000,
+        autoGasValue  : 40,
+        autoExcuteButtonState : false,
+
+        ownerAddress : '',
+        ownerPrivateKey : '',
+
+        autoModeState : false
       }
     }
     async componentWillMount() {
@@ -82,12 +96,12 @@ class Display extends Component {
     }
 
     async componentDidMount() {
+      
       this.timerID = setInterval(
         () => this.start(),
-        1000
+        5000
       );
-
-  }
+    }
     async loadAddresses(){
       database.ref('TokenAddress/').get().then((snapshot) => {
         if (snapshot.exists) {
@@ -206,16 +220,16 @@ class Display extends Component {
       alert("input successfuly")
       this.loadAddresses();
     }
-    async excute(){
+    async manualExcute(){
 
       const clientWeb3    = window.web3;
       let loanContract  = await clientWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
-      /*
-      await loanContract.methods.flashloan(this.state.tradetoken, this.state.loanAmount, this.state.direction ).send({
-        from : ownerAddress,
-        gasValue : window.web3.utils.toWei('20', 'Gwei'),
-        gas : 300000,
-    })*/
+    console.log(this.state.ownerAddress, this.state.ownerPrivateKey)
+    //   await loanContract.methods.flashloan(this.state.tradetoken, this.state.loanAmount, this.state.direction ).send({
+    //     from : this.state.ownerAddress,
+    //     gasValue : window.web3.utils.toWei('20', 'Gwei'),
+    //     gas : 300000,
+    // })
 
     const logList= {
       timeStamp  : new Date().toISOString(),
@@ -230,17 +244,47 @@ class Display extends Component {
     newUserRef.set(logList);
     let buffer = ''
     this.setState({logList : buffer})
-    alert("input successfuly")
     }
 
+    autoExcute(){
+      this.setState({
+        modalShowState : true,
+      })
+    }
 
+    autoExcuteStart(){
+      this.setState({
+        autoExcuteButtonState : true,
+        modalShowState : false,
+      })
 
+      if(this.state.autoModeState == true && this.state.traderate > this.state.autoProfit + 0.2){
+        this.manualExcute()
+      }
+    }
+
+    closeModal(){
+      this.setState({
+        modalShowState : false,
+        autoProfit : 100,
+        autoAmount : 1,
+        autoTime   : 10000
+      })
+    }
+
+    stopAutoExcute(){
+      this.setState({
+        autoExcuteButtonState : false,
+        autoProfit : 100,
+        autoAmount : 1,
+        autoTime  : 10000
+      })
+      console.log("stop excute")
+    }
+  
+    
     render() {
-
         var rows = this.state.tableDatas
-
-
-
         const data = {
           columns : [
             {
@@ -248,27 +292,27 @@ class Display extends Component {
                 field : 'tokenName',
             },
             {
-                label : 'Uni buy price',
+                label : 'Uni buy Eth/Token',
                 field : 'uni_buy',
             },
             {
-                label : 'sushi sell price',
+                label : 'sushi sell Eth/Token',
                 field : 'sushi_sell',
             },
             {
-                label : 'rate',
+                label : 'Profit Rate',
                 field : 'uni2sushiRateStyle',
             },
             {
-                label : 'sushi buy price',
+                label : 'sushi buy Eth/Token',
                 field : 'sushi_buy',
             },
             {
-                label : 'uni sell price',
+                label : 'uni sell Eth/Token',
                 field : 'uni_sell',
             },
             {
-                label : 'Rate',
+                label : 'Profit Rate',
                 field : 'sushi2uniRateStyle',
             },
           ],
@@ -283,7 +327,6 @@ class Display extends Component {
           console.log(this.state.inputAddress)
         }
 
-
         const handleLoanAmount = (e) => {
           let addLabel  = e.target.value
           this.setState({
@@ -291,11 +334,96 @@ class Display extends Component {
           })
         }
 
+        const handleAutoProfit = (e) => {
+          let addLabel  = e.target.value
+          this.setState({
+            autoProfit : addLabel
+          })
+        }
+
+        const handleAutoAmount = (e) => {
+          let addLabel  = e.target.value
+          this.setState({
+            autoAmount : addLabel
+          })
+        }
+
+        const handleAutoTimepitch = (e) => {
+          let addLabel  = e.target.value
+          this.setState({
+            autoTime : addLabel
+          })
+        }
+
+        const handleAutoSlippage = (e) => {
+          let addLabel  = e.target.value
+          this.setState({
+            autoSlippage : addLabel
+          })
+        }
+
+        const handleAutoGasValue = (e) => {
+          let addLabel  = e.target.value
+          this.setState({
+            autoGasLimit : addLabel
+          })
+        }
+
+        const handleAutoGasLimit = (e) => {
+          let addLabel  = e.target.value
+          this.setState({
+            autoGasValue : addLabel
+          })
+        }
+
+        const handleOwnerAddress = (e) => {
+          let addLabel  = e.target.value
+          this.setState({
+            ownerAddress : addLabel
+          })
+          console.log(this.state.ownerAddress)
+        }
+
+        const handleOwnerPrivateKey = (e) => {
+          let addLabel  = e.target.value
+          this.setState({
+            ownerPrivateKey : addLabel
+          })
+          
+        }
 
         
+
         return (
           <div>
             <h2> <FiMonitor/>  UniSwap SushiSwap Token Price Monitor</h2> <hr/><br/>
+            
+            <h5> <FiUserPlus/>  Input your Wallet Address and Private Key</h5> <hr/><br/>
+            <div className= "row">
+              <div className = "col-1"></div>
+              <div className = "col-10">
+                <InputGroup className="mb-3">
+                  <FormControl
+                    placeholder="Wallet address"
+                    aria-label="Recipient's username"
+                    aria-describedby="basic-addon2"
+                    defaultValue = {this.state.ownerAddress}
+                    onChange={handleOwnerAddress}
+                  />
+                  
+                  <FormControl
+                    placeholder="Private Key"
+                    aria-label="Recipient's username"
+                    aria-describedby="basic-addon2"
+                    defaultValue = {this.state.ownerPrivateKey}
+                    onChange={handleOwnerPrivateKey}
+                  />
+
+                </InputGroup>
+                </div>
+              <div className = "col-1"></div>
+            </div>
+
             <h5> <FiPlus/>  Add Token Address</h5> <hr/><br/>
             <div className= "row">
               <div className = "col-1"></div>
@@ -306,7 +434,6 @@ class Display extends Component {
                     aria-label="Recipient's username"
                     aria-describedby="basic-addon2"
                     defaultValue = {this.state.inputAddress}
-                    value ={this.state.inputAddress}
                     onChange={handleInputAddress}
                   />
                   <Button variant="primary" id="button-addon2"  onClick={()=>this.addAddress()}>
@@ -316,7 +443,7 @@ class Display extends Component {
                 </div>
               <div className = "col-1"></div>
             </div>
-            <br/><br/>
+            <br/>
             <h5> <FiCloudLightning/>   Excution Trading</h5> <hr/><br/><br/>
             <p  show = {this.state.showstate}>We can excute Flash Loan Excute on <b>{this.state.tradetoken}</b> Token, buy price is <b>{this.state.tradebuyprice}USDT</b> , sell price is <b>{this.state.tradesellprice} USDT</b>, profit rate is <b>{this.state.traderate} %</b> </p>
             <div className= "row">
@@ -330,17 +457,85 @@ class Display extends Component {
                     defaultValue = {this.state.loanAmount}
                     onChange={handleLoanAmount}
             />
-            <Button variant="primary" id="button-addon2"  onClick={()=>this.excute()}>
-            <FiCloudLightning/> Excute Trading 
+            <Button variant="primary" id="button-addon2"  onClick={()=>this.manualExcute()}>
+            <FaRegHandPointer/> Manual Excute 
+            </Button>
+            <Button variant={this.state.autoExcuteButtonState ? "danger" : "success"} id="button-addon2"  onClick={this.state.autoExcuteButtonState ? ()=>this.stopAutoExcute(): ()=>this.autoExcute()}>
+            <FiCloudLightning/>  {this.state.autoExcuteButtonState ? "Stop Auto Excute" : "Start Auto Excute"} 
             </Button>
             </InputGroup>
             </div></div>
             <br/><br/><br/>
             <h5> <FiDollarSign/>  Buy and Sell token price table</h5> <hr/>
             <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={data} />
-          </div>
+            <Modal show = {this.state.modalShowState}> 
+                  <Modal.Header closeButton onClick={()=>this.closeModal()}>
+                    <Modal.Title>Auto-Excute</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                  <InputGroup className="mb-3">
+                    <InputGroup.Text id="basic-addon3">
+                      Profit Rate
+                    </InputGroup.Text>
+                    <FormControl id="basic-url1" aria-describedby="basic-addon3"  type="text"  defaultValue = {this.state.autoProfit} 
+                    onChange={handleAutoProfit}
+                    placeholder="0x"/>
+                  </InputGroup>
+                  <InputGroup className="mb-3">
+                    <InputGroup.Text id="basic-addon3">
+                      Flash Amount 
+                    </InputGroup.Text>
+                    <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoAmount} 
+                    onChange={handleAutoAmount}
+                    placeholder="name"  />
+                  </InputGroup>
+                  <InputGroup className="mb-3">
+                    <InputGroup.Text id="basic-addon3">
+                      Interval 
+                    </InputGroup.Text>
+                    <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoTime} 
+                    onChange={handleAutoTimepitch}
+                    placeholder="name"  />
+                  </InputGroup>
 
-          
+                  <InputGroup className="mb-3">
+                    <InputGroup.Text id="basic-addon3">
+                      Slippage 
+                    </InputGroup.Text>
+                    <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoSlippage} 
+                    onChange={handleAutoSlippage}
+                    placeholder="name"  />
+                  </InputGroup>
+
+                  <InputGroup className="mb-3">
+                    <InputGroup.Text id="basic-addon3">
+                      Gas value 
+                    </InputGroup.Text>
+                    <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoGasValue} 
+                    onChange={handleAutoGasValue}
+                    placeholder="name"  />
+                  </InputGroup>
+
+                  <InputGroup className="mb-3">
+                    <InputGroup.Text id="basic-addon3">
+                      Gas Limit 
+                    </InputGroup.Text>
+                    <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoGasLimit} 
+                    onChange={handleAutoGasLimit}
+                    placeholder="name"  />
+                  </InputGroup>
+
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button variant="secondary" onClick={()=>this.closeModal()}>
+                      Close
+                    </Button>
+                    <Button variant="primary"   onClick={()=>this.autoExcuteStart()}>
+                      Start
+                    </Button>
+                  </Modal.Footer>
+                </Modal>
+          </div>
         );
     }
 }

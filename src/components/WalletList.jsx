@@ -1,5 +1,4 @@
-import React, {Component, useState} from 'react';
-import { InputGroup, FormControl, Button, Modal} from 'react-bootstrap';
+import React, {Component} from 'react';
 import { database} from './firebase/firebase';
 import { MDBDataTableV5 } from 'mdbreact';
 
