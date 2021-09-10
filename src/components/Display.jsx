@@ -1,28 +1,30 @@
 import React, { Component } from 'react';
-import { Button,InputGroup, FormControl, Modal} from 'react-bootstrap';
+import { Button,InputGroup, FormControl, Modal, Card} from 'react-bootstrap';
 import './App.css';
 import Web3 from 'web3';
-import { erc20abi , abi ,smartcontractabi} from './abi';
+import { erc20abi , abi } from './abi';
 import { MDBDataTableV5 } from 'mdbreact';
 import { database,  } from './firebase/firebase';
 import { FiMonitor , FiPlus , FiCloudLightning ,FiDollarSign, FiUserPlus   } from "react-icons/fi";
 import { FaRegHandPointer } from "react-icons/fa"
+import { BsClockHistory } from "react-icons/bs"
+
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 
 
-const options = {
-  timeout: 30000,
-  clientConfig: {
-      maxReceivedFrameSize:   100000000,
-      maxReceivedMessageSize: 100000000,
-  },
-  reconnect: {
-      auto: true,
-      delay: 5000,
-      maxAttempts: 15,
-      onTimeout: false,
-  },
-};
+// const options = {
+//   timeout: 30000,
+//   clientConfig: {
+//       maxReceivedFrameSize:   100000000,
+//       maxReceivedMessageSize: 100000000,
+//   },
+//   reconnect: {
+//       auto: true,
+//       delay: 5000,
+//       maxAttempts: 15,
+//       onTimeout: false,
+//   },
+// };
 
 // const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://purple-wispy-flower.quiknode.pro/a2ae460515f061ce64f526edcb10eda275f62585/', options));
 const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
@@ -87,11 +89,15 @@ class Display extends Component {
         ownerAddress : '',
         ownerPrivateKey : '',
 
-        autoModeState : false
+        autoModeState : false,
+
+        log : [],
+        logs :[],
       }
     }
     async componentWillMount() {
         this.loadAddresses()
+        await this.loadLog()
         clearInterval(this.timerID);
     }
 
@@ -123,6 +129,34 @@ class Display extends Component {
         }
       });
     }
+
+    loadLog(){
+      database.ref('log/').get().then((snapshot) => {
+          if (snapshot.exists) {
+            var logs = [];
+              const newArray = snapshot.val();
+              
+              if (newArray) {
+                  Object.keys(newArray).map((key, index) => {
+                      
+                    const value = newArray[key];
+                      logs.push({
+                          timeStamp  : value.timeStamp,
+                          tradeToken : value.tradeToken,
+                          loanAmount : value.loanAmount,
+                          direction  : value.direction,
+                          tradeRate  : value.tradeRate,
+                      })
+                  })
+              }
+              this.setState({
+              logs : logs
+            })
+          }
+      });
+  }
+
+
     async start (){
       for (let index = 0; index < this.state.tokenAddresses.length; index++) {
         let tokenContract= new web3.eth.Contract(erc20abi,this.state.tokenAddresses[index]["Address"]);
@@ -284,8 +318,8 @@ class Display extends Component {
   
     
     render() {
-        var rows = this.state.tableDatas
-        const data = {
+        var rowstable = this.state.tableDatas
+        const datatable = {
           columns : [
             {
                 label : 'Token',
@@ -316,8 +350,45 @@ class Display extends Component {
                 field : 'sushi2uniRateStyle',
             },
           ],
-          rows : rows,
+          rows : rowstable,
         }
+
+        const rowslog = this.state.logs
+        const datalog = {
+          columns: [
+            {
+              label: 'TimeStamp',
+              field: 'timeStamp',
+              sort: 'asc',
+              width: 150
+            },
+            {
+              label: 'Trade Token',
+              field: 'tradeToken',
+              sort: 'asc',
+              width: 270
+            },
+            {
+              label: 'Trade Amount',
+              field: 'loanAmount',
+              sort: 'asc',
+              width: 200
+            },
+            {
+                label: 'direction',
+              field: 'direction',
+              sort: 'asc',
+              width: 100
+            },
+            {
+              label: 'Trade Rate',
+              field: 'tradeRate',
+              sort: 'asc',
+              width: 100
+            }
+          ],
+          rows : rowslog
+        };
 
         const handleInputAddress = (e) => {
           let addLabel  = e.target.value
@@ -396,78 +467,112 @@ class Display extends Component {
 
         return (
           <div>
-            <h2> <FiMonitor/>  UniSwap SushiSwap Token Price Monitor</h2> <hr/><br/>
             
-            <h5> <FiUserPlus/>  Input your Wallet Address and Private Key</h5> <hr/><br/>
-            <div className= "row">
-              <div className = "col-1"></div>
-              <div className = "col-10">
-                <InputGroup className="mb-3">
-                  <FormControl
-                    placeholder="Wallet address"
-                    aria-label="Recipient's username"
-                    aria-describedby="basic-addon2"
-                    defaultValue = {this.state.ownerAddress}
-                    onChange={handleOwnerAddress}
-                  />
-                  
-                  <FormControl
-                    placeholder="Private Key"
-                    aria-label="Recipient's username"
-                    aria-describedby="basic-addon2"
-                    defaultValue = {this.state.ownerPrivateKey}
-                    onChange={handleOwnerPrivateKey}
-                  />
+                <div className= "row">
+                    <div className = "col-7">
+                    <Card  bg="light" style={{ height: '35rem' }} border="primary">
+                      <Card.Body>
+                        <Card.Title><h2> <FiMonitor/>  UniSwap SushiSwap Token Price Monitor</h2> <hr/></Card.Title>
+                        <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={datatable} /><br/><br/>
+                      </Card.Body>
+                    </Card><br/>
 
-                </InputGroup>
-                </div>
-              <div className = "col-1"></div>
-            </div>
+                    <Card bg="light"  style={{ height: '30rem' }} >
+                      <Card.Body>
+                        <Card.Title><h2> <BsClockHistory/>  Trade Log</h2> <hr/></Card.Title>
+                        <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={datalog} />
+                      </Card.Body>
+                    </Card>
+                    </div>
+   
+                    <div className = "col-5">
 
-            <h5> <FiPlus/>  Add Token Address</h5> <hr/><br/>
-            <div className= "row">
-              <div className = "col-1"></div>
-              <div className = "col-10">
-                <InputGroup className="mb-3">
-                  <FormControl
-                    placeholder="Add Token address  "
-                    aria-label="Recipient's username"
-                    aria-describedby="basic-addon2"
-                    defaultValue = {this.state.inputAddress}
-                    onChange={handleInputAddress}
-                  />
-                  <Button variant="primary" id="button-addon2"  onClick={()=>this.addAddress()}>
-                  <FiPlus/>  Add Token Address
-                  </Button>
-                </InputGroup>
+                    <Card bg="light"  style={{ height: '67rem' }} border="primary">
+                      <Card.Body>
+                        <h2> <FiUserPlus/>  Input your Wallet Address and Private Key</h2> <hr/><br/>
+                          <div className= "row">
+                            <div className = "col-1"></div>
+                            <div className = "col-10">
+                              <InputGroup className="mb-3">
+                                <FormControl
+                                  placeholder="Wallet address"
+                                  aria-label="Recipient's username"
+                                  aria-describedby="basic-addon2"
+                                  defaultValue = {this.state.ownerAddress}
+                                  onChange={handleOwnerAddress}
+                                />
+                                
+                                <FormControl
+                                  placeholder="Private Key"
+                                  aria-label="Recipient's username"
+                                  aria-describedby="basic-addon2"
+                                  defaultValue = {this.state.ownerPrivateKey}
+                                  onChange={handleOwnerPrivateKey}
+                                />
+
+                              </InputGroup>
+                              </div>
+                            <div className = "col-1"></div>
+                          </div><br/><br/><br/><br/>
+
+                          <h2> <FiPlus/>  Add Token Address</h2> <hr/><br/>
+                          <div className= "row">
+                            <div className = "col-1"></div>
+                            <div className = "col-10">
+                              <InputGroup className="mb-3">
+                                <FormControl
+                                  placeholder="Add Token address  "
+                                  aria-label="Recipient's username"
+                                  aria-describedby="basic-addon2"
+                                  defaultValue = {this.state.inputAddress}
+                                  onChange={handleInputAddress}
+                                />
+                                <Button variant="primary" id="button-addon2"  onClick={()=>this.addAddress()}>
+                                <FiPlus/>  Add Token Address
+                                </Button>
+                              </InputGroup>
+                              </div>
+                            <div className = "col-1"></div>
+                          </div>
+                          <br/><br/><br/><br/>
+
+                          <h2> <FiCloudLightning/>   Excution Trading</h2> <hr/><br/><br/>
+                          <p  show = {this.state.showstate}>We can excute Flash Loan Excute on <b>{this.state.tradetoken}</b> Token, buy price is <b>{this.state.tradebuyprice}USDT</b> , sell price is <b>{this.state.tradesellprice} USDT</b>, profit rate is <b>{this.state.traderate} %</b> </p>
+                          <div className= "row">
+                          <div className = "col-1"></div>
+                          <div className = "col-10">
+                          <InputGroup className="mb-3">
+                          <FormControl
+                                  placeholder="Loan Amount"
+                                  aria-label="Loan Amount"
+                                  aria-describedby="basic-addon2"
+                                  defaultValue = {this.state.loanAmount}
+                                  onChange={handleLoanAmount}
+                          />
+                          <Button variant="primary" id="button-addon2"  onClick={()=>this.manualExcute()}>
+                          <FaRegHandPointer/> Manual Excute 
+                          </Button>
+                          <Button variant={this.state.autoExcuteButtonState ? "danger" : "success"} id="button-addon2"  onClick={this.state.autoExcuteButtonState ? ()=>this.stopAutoExcute(): ()=>this.autoExcute()}>
+                          <FiCloudLightning/>  {this.state.autoExcuteButtonState ? "Stop Auto Excute" : "Start Auto Excute"} 
+                          </Button>
+                          </InputGroup>
+                          </div></div>
+                          <br/><br/><br/>
+                      </Card.Body>
+                    </Card>
+                     
+                    </div>
                 </div>
-              <div className = "col-1"></div>
-            </div>
-            <br/>
-            <h5> <FiCloudLightning/>   Excution Trading</h5> <hr/><br/><br/>
-            <p  show = {this.state.showstate}>We can excute Flash Loan Excute on <b>{this.state.tradetoken}</b> Token, buy price is <b>{this.state.tradebuyprice}USDT</b> , sell price is <b>{this.state.tradesellprice} USDT</b>, profit rate is <b>{this.state.traderate} %</b> </p>
-            <div className= "row">
-            <div className = "col-1"></div>
-            <div className = "col-10">
-            <InputGroup className="mb-3">
-            <FormControl
-                    placeholder="Loan Amount"
-                    aria-label="Loan Amount"
-                    aria-describedby="basic-addon2"
-                    defaultValue = {this.state.loanAmount}
-                    onChange={handleLoanAmount}
-            />
-            <Button variant="primary" id="button-addon2"  onClick={()=>this.manualExcute()}>
-            <FaRegHandPointer/> Manual Excute 
-            </Button>
-            <Button variant={this.state.autoExcuteButtonState ? "danger" : "success"} id="button-addon2"  onClick={this.state.autoExcuteButtonState ? ()=>this.stopAutoExcute(): ()=>this.autoExcute()}>
-            <FiCloudLightning/>  {this.state.autoExcuteButtonState ? "Stop Auto Excute" : "Start Auto Excute"} 
-            </Button>
-            </InputGroup>
-            </div></div>
-            <br/><br/><br/>
-            <h5> <FiDollarSign/>  Buy and Sell token price table</h5> <hr/>
-            <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={data} />
+
+
+          
+
+
+           
+            
+
+            
+            
             <Modal show = {this.state.modalShowState}> 
                   <Modal.Header closeButton onClick={()=>this.closeModal()}>
                     <Modal.Title>Auto-Excute</Modal.Title>
