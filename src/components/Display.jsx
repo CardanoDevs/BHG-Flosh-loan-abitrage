@@ -45,7 +45,7 @@ const Eth_address   = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 // const sushi_address   = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
 // const Eth_address     = '0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD'
 const smartContractAddress = '0xdE026BCa0e9125c35a05cdCB1cBC276fe6A9696f'
-
+var intervalvar
 class Display extends Component {
     constructor(props){
       super(props)
@@ -78,9 +78,9 @@ class Display extends Component {
         direction : true,
         // auto start
         modalShowState :  false,
-        autoProfit : 100,
+        autoProfit : 0,
         autoAmount : 1,
-        autoTime   : 100000,
+        autoTime   : 1,
         autoSlippage  : 100,
         autoGasLimit  : 500000,
         autoGasValue  : 40,
@@ -90,19 +90,20 @@ class Display extends Component {
         ownerPrivateKey : '',
 
         autoModeState : false,
+        walletBalance : '',
 
         log : [],
         logs :[],
       }
     }
+
     async componentWillMount() {
         this.loadAddresses()
         await this.loadLog()
         clearInterval(this.timerID);
     }
 
-    async componentDidMount() {
-      
+    async componentDidMount() {  
       this.timerID = setInterval(
         () => this.start(),
         5000
@@ -174,8 +175,8 @@ class Display extends Component {
         let sushi_sell     = await mycontract2.methods.getAmountsOut(Math.pow(10, 15) , [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
         sushi_buy          = Math.round(sushi_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
         sushi_sell       = Math.round( Math.pow(10, tokenDecimal)  / sushi_sell[1] ) /1000
-        let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 1000/sushi_sell) /10
-        let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 1000/uni_sell)/10
+        let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 10000/sushi_sell)  /100 
+        let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 10000/uni_sell)    /100
         let uni2sushiRateStyle 
         let sushi2uniRateStyle
         if (uni2sushiRate >= 0){
@@ -215,8 +216,8 @@ class Display extends Component {
           uni_sell      : uni_sell,
           sushi_buy    : sushi_buy,
           sushi_sell    : sushi_sell,
-          uni2sushiRate : uni2sushiRate,
-          sushi2uniRate : sushi2uniRate,
+          uni2sushiRate : uni2sushiRate ,
+          sushi2uniRate : sushi2uniRate ,
           uni2sushiRateStyle : uni2sushiRateStyle,
           sushi2uniRateStyle : sushi2uniRateStyle
         }
@@ -227,6 +228,7 @@ class Display extends Component {
         })
       }
     }
+
     async addAddress(){
 
       if(this.state.inputAddress==""){
@@ -255,35 +257,62 @@ class Display extends Component {
       this.loadAddresses();
     }
     async manualExcute(){
+      
+      
+      if(this.state.traderate < this.state.autoProfit){
+        console.log("faild profit")
+        return
+      }
+      console.log('successful')
+      // const privateWeb3    = window.web3;
+      // let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
+      // let nonce = await privateWeb3.eth.getTransactionCount(this.state.ownerAddress)
 
-      const clientWeb3    = window.web3;
-      let loanContract  = await clientWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
-    console.log(this.state.ownerAddress, this.state.ownerPrivateKey)
-    //   await loanContract.methods.flashloan(this.state.tradetoken, this.state.loanAmount, this.state.direction ).send({
-    //     from : this.state.ownerAddress,
-    //     gasValue : window.web3.utils.toWei('20', 'Gwei'),
-    //     gas : 300000,
-    // })
+      // let tx = {
+      //   from : this.state.ownerAddress,
+      //   to   : smartContractAddress,
+      //   data : loanContract.methods.flashloan(this.state.tradetoken, this.state.loanAmount, this.state.direction).encodeABI(),
+      //   gasValue : web3.utils.toWei(this.state.autoGasValue, 'Gwei'),
+      //   gas      : this.state.autoGasLimit,
+      //   nonce    : nonce
+      // }
 
-    const logList= {
-      timeStamp  : new Date().toISOString(),
-      loanAmount : this.state.loanAmount,
-      tradeToken : this.state.tradetoken,
-      tradeRate  : this.state.traderate,
-      direction  : this.state.direction,
-    }
+      // const promise = await privateWeb3.eth.accounts.signTransaction(tx, this.state.ownerPrivateKey)
+      // await privateWeb3.eth.sendSignedTransaction(promise.rawTransaction).once('confirmation', () => {
+      //   let process = this.state.process
+      //   let message = 'Bob closes the swap.\n'
+      //   process += message
+      //   this.setState({
+      //       process : process
+      //   })
+      //   })
+      //   .once('error', (e) => {
+      //       console.log(e)
+      //   })
 
-    var userListRef = database.ref('log')
-    var newUserRef = userListRef.push();
-    newUserRef.set(logList);
-    let buffer = ''
-    this.setState({logList : buffer})
+      // const logList= {
+      //   timeStamp  : new Date().toISOString(),
+      //   loanAmount : this.state.loanAmount,
+      //   tradeToken : this.state.tradetoken,
+      //   tradeRate  : this.state.traderate,
+      //   direction  : this.state.direction,
+      // }
+
+      // var userListRef = database.ref('log')
+      // var newUserRef = userListRef.push();
+      // newUserRef.set(logList);
+      // let buffer = ''
+      // this.setState({logList : buffer})
     }
 
     autoExcute(){
-      this.setState({
-        modalShowState : true,
-      })
+      if (this.state.ownerAddress == '' || this.state.ownerPrivateKey == ''){
+          alert("please input address and privatekey")
+          return
+      }
+        this.setState({
+          modalShowState : true,
+        })
     }
 
     autoExcuteStart(){
@@ -292,9 +321,10 @@ class Display extends Component {
         modalShowState : false,
       })
 
-      if(this.state.autoModeState == true && this.state.traderate > this.state.autoProfit + 0.2){
-        this.manualExcute()
-      }
+      intervalvar  = setInterval(
+        () => this.manualExcute(),
+        this.state.autoTime * 1000
+      );
     }
 
     closeModal(){
@@ -302,21 +332,28 @@ class Display extends Component {
         modalShowState : false,
         autoProfit : 100,
         autoAmount : 1,
-        autoTime   : 10000
+        autoTime   : 10000,
+        autoSlippage  : 100,
+        autoGasLimit  : 500000,
+        autoGasValue  : 40,
       })
     }
 
     stopAutoExcute(){
       this.setState({
         autoExcuteButtonState : false,
-        autoProfit : 100,
-        autoAmount : 1,
-        autoTime  : 10000
+        autoProfit    : 1,
+        autoAmount    : 1,
+        autoTime      : 1,
+        autoSlippage  : 100,
+        autoGasLimit  : 500000,
+        autoGasValue  : 40,
+        autoModeState : false,
       })
       console.log("stop excute")
+      clearInterval(intervalvar)
     }
   
-    
     render() {
         var rowstable = this.state.tableDatas
         const datatable = {
@@ -451,8 +488,11 @@ class Display extends Component {
           let addLabel  = e.target.value
           this.setState({
             ownerAddress : addLabel
+            
           })
-          console.log(this.state.ownerAddress)
+     
+
+      
         }
 
         const handleOwnerPrivateKey = (e) => {
@@ -477,7 +517,7 @@ class Display extends Component {
                       </Card.Body>
                     </Card><br/>
 
-                    <Card bg="light"  style={{ height: '30rem' }} >
+                    <Card bg="light"  style={{ height: '30rem' }} border="primary" >
                       <Card.Body>
                         <Card.Title><h2> <BsClockHistory/>  Trade Log</h2> <hr/></Card.Title>
                         <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={datalog} />
@@ -563,16 +603,6 @@ class Display extends Component {
                      
                     </div>
                 </div>
-
-
-          
-
-
-           
-            
-
-            
-            
             <Modal show = {this.state.modalShowState}> 
                   <Modal.Header closeButton onClick={()=>this.closeModal()}>
                     <Modal.Title>Auto-Excute</Modal.Title>
