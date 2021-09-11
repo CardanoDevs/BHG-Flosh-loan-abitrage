@@ -27,16 +27,16 @@ import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 // };
 
 // const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://purple-wispy-flower.quiknode.pro/a2ae460515f061ce64f526edcb10eda275f62585/', options));
-const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
-const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-const sushi_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
-const Eth_address   = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-
-
-// const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
+// const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 // const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-// const sushi_address   = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
-// const Eth_address    = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+// const sushi_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
+// const Eth_address   = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+
+
+const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
+const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
+const sushi_address   = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
+const Eth_address    = '0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD'
 
 
 
@@ -110,7 +110,7 @@ class Display extends Component {
       );
     }
     async loadAddresses(){
-      database.ref('TokenAddress/').get().then((snapshot) => {
+      database.ref('KovanTokenAddress/').get().then((snapshot) => {
         if (snapshot.exists) {
             var walletList = [];
             const newArray = snapshot.val();
@@ -131,7 +131,6 @@ class Display extends Component {
       });
     }
 
-    
     loadLog(){
       database.ref('log/').get().then((snapshot) => {
           if (snapshot.exists) {
@@ -165,19 +164,20 @@ class Display extends Component {
         let tokenName    = await tokenContract.methods.symbol().call().then(function(res) {  return res;  })
         let tokenDecimal = await tokenContract.methods.decimals().call()
         let mycontract1  = new web3.eth.Contract(abi, uniswap_address)
-
+        console.log(tokenDecimal)
         let uni_buy      = await mycontract1.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
         let uni_sell     = await mycontract1.methods.getAmountsOut(Math.pow(10, 15), [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
-        uni_buy          = Math.round(uni_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
-        uni_sell         = Math.round( Math.pow(10, tokenDecimal) / uni_sell[1] ) /1000
+        uni_buy          = uni_buy[1] / Math.pow(10, tokenDecimal - 3 )
+        uni_sell         = Math.pow(10, tokenDecimal - 3) / uni_sell[1] 
 
-        let mycontract2  = new web3.eth.Contract(abi, sushi_address)
+        let mycontract2    = new web3.eth.Contract(abi, sushi_address)
         let sushi_buy      = await mycontract2.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
         let sushi_sell     = await mycontract2.methods.getAmountsOut(Math.pow(10, 15) , [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
-        sushi_buy          = Math.round(sushi_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
-        sushi_sell       = Math.round( Math.pow(10, tokenDecimal)  / sushi_sell[1] ) /1000
-        let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 10000/sushi_sell)  /100 
-        let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 10000/uni_sell)    /100
+        sushi_buy          = sushi_buy[1] / Math.pow(10, tokenDecimal - 3 )
+        sushi_sell         = Math.pow(10, tokenDecimal -3 )  / sushi_sell[1] 
+
+        let uni2sushiRate  = Math.round((uni_buy-sushi_sell) * 10000/sushi_sell)  /100 
+        let sushi2uniRate  = Math.round((sushi_buy-uni_sell) * 10000/uni_sell)    /100
         
         let uni2sushiRateStyle 
         let sushi2uniRateStyle
@@ -273,7 +273,7 @@ class Display extends Component {
       const tokenAddressList= {
         Address   : web3.utils.toChecksumAddress(this.state.inputAddress),
       }
-      var userListRef = database.ref('TokenAddress')
+      var userListRef = database.ref('KovanTokenAddress')
       var newUserRef = userListRef.push();
       newUserRef.set(tokenAddressList);
       let buffer = ''
