@@ -109,6 +109,7 @@ class Display extends Component {
         5000
       );
     }
+    
     async loadAddresses(){
       database.ref('TokenAddress/').get().then((snapshot) => {
         if (snapshot.exists) {
