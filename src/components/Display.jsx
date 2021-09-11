@@ -5,7 +5,7 @@ import Web3 from 'web3';
 import { erc20abi , abi } from './abi';
 import { MDBDataTableV5 } from 'mdbreact';
 import { database,  } from './firebase/firebase';
-import { FiMonitor , FiPlus , FiCloudLightning ,FiDollarSign, FiUserPlus   } from "react-icons/fi";
+import { FiMonitor , FiPlus , FiCloudLightning , FiUserPlus   } from "react-icons/fi";
 import { FaRegHandPointer } from "react-icons/fa"
 import { BsClockHistory } from "react-icons/bs"
 
@@ -177,8 +177,10 @@ class Display extends Component {
         sushi_sell       = Math.round( Math.pow(10, tokenDecimal)  / sushi_sell[1] ) /1000
         let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 10000/sushi_sell)  /100 
         let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 10000/uni_sell)    /100
+        
         let uni2sushiRateStyle 
         let sushi2uniRateStyle
+
         if (uni2sushiRate >= 0){
            uni2sushiRateStyle     = <a className='text-success'> {uni2sushiRate} </a>
            if(uni2sushiRate > this.state.traderate){
@@ -191,9 +193,13 @@ class Display extends Component {
             })
            }
         }
+
+
         else if (uni2sushiRate < 0){
            uni2sushiRateStyle     = <a className='text-danger'> {uni2sushiRate} </a>
         }
+
+
         if (sushi2uniRate >= 0){
            sushi2uniRateStyle     = <a className='text-success'> {sushi2uniRate} </a>
            if(sushi2uniRate > this.state.traderate){
@@ -206,9 +212,27 @@ class Display extends Component {
             })
            }
         }
+
+
         else if (sushi2uniRate < 0){
            sushi2uniRateStyle     = <a className='text-danger'> {sushi2uniRate} </a>
         }
+
+        if (this.state.tradeToken == tokenName){
+          if (this.state.direction == true){
+            this.setState({
+              traderate : uni2sushiRate
+            })
+          }
+          else if(this.state.direction == false){
+            this.setState({
+              traderate : sushi2uniRate
+            })
+          }
+
+        }
+
+
         let tableData = {
           tokenName     : tokenName,
           tokenDecimal  : tokenDecimal,
@@ -264,45 +288,45 @@ class Display extends Component {
         return
       }
       console.log('successful')
-      // const privateWeb3    = window.web3;
-      // let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
-      // let nonce = await privateWeb3.eth.getTransactionCount(this.state.ownerAddress)
+      const privateWeb3    = window.web3;
+      let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
+      let nonce = await privateWeb3.eth.getTransactionCount(this.state.ownerAddress)
 
-      // let tx = {
-      //   from : this.state.ownerAddress,
-      //   to   : smartContractAddress,
-      //   data : loanContract.methods.flashloan(this.state.tradetoken, this.state.loanAmount, this.state.direction).encodeABI(),
-      //   gasValue : web3.utils.toWei(this.state.autoGasValue, 'Gwei'),
-      //   gas      : this.state.autoGasLimit,
-      //   nonce    : nonce
-      // }
+      let tx = {
+        from : this.state.ownerAddress,
+        to   : smartContractAddress,
+        data : loanContract.methods.flashloan(this.state.tradetoken, this.state.loanAmount, this.state.direction).encodeABI(),
+        gasValue : web3.utils.toWei(this.state.autoGasValue, 'Gwei'),
+        gas      : this.state.autoGasLimit,
+        nonce    : nonce
+      }
 
-      // const promise = await privateWeb3.eth.accounts.signTransaction(tx, this.state.ownerPrivateKey)
-      // await privateWeb3.eth.sendSignedTransaction(promise.rawTransaction).once('confirmation', () => {
-      //   let process = this.state.process
-      //   let message = 'Bob closes the swap.\n'
-      //   process += message
-      //   this.setState({
-      //       process : process
-      //   })
-      //   })
-      //   .once('error', (e) => {
-      //       console.log(e)
-      //   })
+      const promise = await privateWeb3.eth.accounts.signTransaction(tx, this.state.ownerPrivateKey)
+      await privateWeb3.eth.sendSignedTransaction(promise.rawTransaction).once('confirmation', () => {
+        let process = this.state.process
+        let message = 'Bob closes the swap.\n'
+        process += message
+        this.setState({
+            process : process
+        })
+        })
+        .once('error', (e) => {
+            console.log(e)
+        })
 
-      // const logList= {
-      //   timeStamp  : new Date().toISOString(),
-      //   loanAmount : this.state.loanAmount,
-      //   tradeToken : this.state.tradetoken,
-      //   tradeRate  : this.state.traderate,
-      //   direction  : this.state.direction,
-      // }
+      const logList= {
+        timeStamp  : new Date().toISOString(),
+        loanAmount : this.state.loanAmount,
+        tradeToken : this.state.tradetoken,
+        tradeRate  : this.state.traderate,
+        direction  : this.state.direction,
+      }
 
-      // var userListRef = database.ref('log')
-      // var newUserRef = userListRef.push();
-      // newUserRef.set(logList);
-      // let buffer = ''
-      // this.setState({logList : buffer})
+      var userListRef = database.ref('log')
+      var newUserRef = userListRef.push();
+      newUserRef.set(logList);
+      let buffer = ''
+      this.setState({logList : buffer})
     }
 
     autoExcute(){
