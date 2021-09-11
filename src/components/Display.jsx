@@ -131,6 +131,7 @@ class Display extends Component {
       });
     }
 
+    
     loadLog(){
       database.ref('log/').get().then((snapshot) => {
           if (snapshot.exists) {
