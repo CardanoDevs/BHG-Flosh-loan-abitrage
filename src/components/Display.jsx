@@ -12,19 +12,19 @@ import { BsClockHistory } from "react-icons/bs"
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 
 
-// const options = {
-//   timeout: 30000,
-//   clientConfig: {
-//       maxReceivedFrameSize:   100000000,
-//       maxReceivedMessageSize: 100000000,
-//   },
-//   reconnect: {
-//       auto: true,
-//       delay: 5000,
-//       maxAttempts: 15,
-//       onTimeout: false,
-//   },
-// };
+const options = {
+  timeout: 30000,
+  clientConfig: {
+      maxReceivedFrameSize:   100000000,
+      maxReceivedMessageSize: 100000000,
+  },
+  reconnect: {
+      auto: true,
+      delay: 5000,
+      maxAttempts: 15,
+      onTimeout: false,
+  },
+};
 
 // const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://purple-wispy-flower.quiknode.pro/a2ae460515f061ce64f526edcb10eda275f62585/', options));
 const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
@@ -33,17 +33,6 @@ const sushi_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
 const Eth_address   = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 
 
-// const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
-// const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-// const sushi_address   = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
-// const Eth_address    = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-
-
-
-// const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
-// const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-// const sushi_address   = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
-// const Eth_address     = '0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD'
 const smartContractAddress = '0xdE026BCa0e9125c35a05cdCB1cBC276fe6A9696f'
 var intervalvar
 class Display extends Component {
@@ -92,7 +81,7 @@ class Display extends Component {
         autoModeState : false,
         walletBalance : '',
 
-        log : [],
+
         logs :[],
       }
     }
@@ -109,7 +98,7 @@ class Display extends Component {
         5000
       );
     }
-    
+
     async loadAddresses(){
       database.ref('TokenAddress/').get().then((snapshot) => {
         if (snapshot.exists) {
