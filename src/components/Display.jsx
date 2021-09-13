@@ -11,6 +11,9 @@ import { BsClockHistory } from "react-icons/bs"
 
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 
+const smartContractAddress = '0x77568Cea1383d43eE84315Bca88598582d0A3fB3'
+
+
 
 const options = {
   timeout: 30000,
@@ -40,7 +43,7 @@ const sushi_address = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
 const Eth_address   = '0xd0A1E359811322d97991E03f863a0C30C2cF029C'
 
 
-const smartContractAddress = '0x77568Cea1383d43eE84315Bca88598582d0A3fB3'
+
 var intervalvar
 class Display extends Component {
     constructor(props){
