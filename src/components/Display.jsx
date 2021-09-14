@@ -9,6 +9,8 @@ import { FiMonitor , FiPlus , FiCloudLightning , FiUserPlus   } from "react-icon
 import { FaRegHandPointer } from "react-icons/fa"
 import { BsClockHistory } from "react-icons/bs"
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
+
+
 const smartContractAddress = '0x77568Cea1383d43eE84315Bca88598582d0A3fB3'
 const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
@@ -254,18 +256,14 @@ class Display extends Component {
       this.loadAddresses();
     }
     async manualExcute(){
-      
       if(this.state.traderate < this.state.autoProfit){
         console.log("faild profit")
         return
       }
-
       console.log('successful')
       const privateWeb3    = window.web3;
-
       console.log(smartContractAddress)
       let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
-      console.log(loanContract)
       let nonce = await privateWeb3.eth.getTransactionCount(this.state.ownerAddress)
       console.log(nonce,this.state.ownerAddress, this.state.autoAmount, this.state.tradeToken , this.state.direction)
      console.log(this.state.autoGasLimit, this.state.autoGasValue)
@@ -277,10 +275,8 @@ class Display extends Component {
         gas      : this.state.autoGasLimit,
         nonce    : nonce
       }
-
         const promise = await privateWeb3.eth.accounts.signTransaction(tx, this.state.ownerPrivateKey)
         await privateWeb3.eth.sendSignedTransaction(promise.rawTransaction).once('confirmation', () => {
-          
           const logList= {
             timeStamp  : new Date().toISOString(),
             loanAmount : this.state.autoAmount,
