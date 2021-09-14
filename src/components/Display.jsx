@@ -12,39 +12,38 @@ import { BsClockHistory } from "react-icons/bs"
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 
 
-// const options = {
-//   timeout: 30000,
-//   clientConfig: {
-//       maxReceivedFrameSize:   100000000,
-//       maxReceivedMessageSize: 100000000,
-//   },
-//   reconnect: {
-//       auto: true,
-//       delay: 5000,
-//       maxAttempts: 15,
-//       onTimeout: false,
-//   },
-// };
+
+
+
+const options = {
+  timeout: 30000,
+  clientConfig: {
+      maxReceivedFrameSize:   100000000,
+      maxReceivedMessageSize: 100000000,
+  },
+  reconnect: {
+      auto: true,
+      delay: 5000,
+      maxAttempts: 15,
+      onTimeout: false,
+  },
+};
 
 // const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://purple-wispy-flower.quiknode.pro/a2ae460515f061ce64f526edcb10eda275f62585/', options));
-// const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
-// const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-// const sushi_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
-// const Eth_address   = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-
-
-const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
+const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-const sushi_address   = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
-const Eth_address    = '0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD'
+const sushi_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
+const Eth_address   = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
 
 
 // const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 // const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-// const sushi_address   = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
-// const Eth_address     = '0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD'
-const smartContractAddress = '0xdE026BCa0e9125c35a05cdCB1cBC276fe6A9696f'
+// const sushi_address = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
+// const Eth_address   = '0xd0A1E359811322d97991E03f863a0C30C2cF029C'
+
+
+
 var intervalvar
 class Display extends Component {
     constructor(props){
@@ -66,7 +65,7 @@ class Display extends Component {
         tokenAddresses : [],
 
         // trading parameter
-        tradetoken : '',
+        tradeToken : '',
         tradebuyprice : 0,
         tradesellprice : 0,
         traderate       : 0,
@@ -75,15 +74,15 @@ class Display extends Component {
         loanAmount : '',
         logTimestamp : '',
         logList : '',
-        direction : true,
+        direction : 1,
         // auto start
         modalShowState :  false,
         autoProfit : 0,
         autoAmount : 1,
-        autoTime   : 1,
+        autoTime   : 10,
         autoSlippage  : 100,
         autoGasLimit  : 500000,
-        autoGasValue  : 40,
+        autoGasValue  : '40',
         autoExcuteButtonState : false,
 
         ownerAddress : '',
@@ -92,8 +91,8 @@ class Display extends Component {
         autoModeState : false,
         walletBalance : '',
 
-        log : [],
         logs :[],
+        contractAddress : ''
       }
     }
 
@@ -109,8 +108,9 @@ class Display extends Component {
         5000
       );
     }
+
     async loadAddresses(){
-      database.ref('KovanTokenAddress/').get().then((snapshot) => {
+      database.ref('TokenAddress/').get().then((snapshot) => {
         if (snapshot.exists) {
             var walletList = [];
             const newArray = snapshot.val();
@@ -141,7 +141,7 @@ class Display extends Component {
                   Object.keys(newArray).map((key, index) => {
                       
                     const value = newArray[key];
-                      logs.push({
+                      logs.unshift({
                           timeStamp  : value.timeStamp,
                           tradeToken : value.tradeToken,
                           loanAmount : value.loanAmount,
@@ -164,20 +164,19 @@ class Display extends Component {
         let tokenName    = await tokenContract.methods.symbol().call().then(function(res) {  return res;  })
         let tokenDecimal = await tokenContract.methods.decimals().call()
         let mycontract1  = new web3.eth.Contract(abi, uniswap_address)
-        console.log(tokenDecimal)
+
         let uni_buy      = await mycontract1.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
         let uni_sell     = await mycontract1.methods.getAmountsOut(Math.pow(10, 15), [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
-        uni_buy          = uni_buy[1] / Math.pow(10, tokenDecimal - 3 )
-        uni_sell         = Math.pow(10, tokenDecimal - 3) / uni_sell[1] 
+        uni_buy          = Math.round(uni_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
+        uni_sell         = Math.round( Math.pow(10, tokenDecimal) / uni_sell[1] ) /1000
 
-        let mycontract2    = new web3.eth.Contract(abi, sushi_address)
+        let mycontract2  = new web3.eth.Contract(abi, sushi_address)
         let sushi_buy      = await mycontract2.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
         let sushi_sell     = await mycontract2.methods.getAmountsOut(Math.pow(10, 15) , [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
-        sushi_buy          = sushi_buy[1] / Math.pow(10, tokenDecimal - 3 )
-        sushi_sell         = Math.pow(10, tokenDecimal -3 )  / sushi_sell[1] 
-
-        let uni2sushiRate  = Math.round((uni_buy-sushi_sell) * 10000/sushi_sell)  /100 
-        let sushi2uniRate  = Math.round((sushi_buy-uni_sell) * 10000/uni_sell)    /100
+        sushi_buy          = Math.round(sushi_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
+        sushi_sell       = Math.round( Math.pow(10, tokenDecimal)  / sushi_sell[1] ) /1000
+        let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 10000/sushi_sell)  /100 
+        let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 10000/uni_sell)    /100
         
         let uni2sushiRateStyle 
         let sushi2uniRateStyle
@@ -186,11 +185,12 @@ class Display extends Component {
            uni2sushiRateStyle     = <a className='text-success'> {uni2sushiRate} </a>
            if(uni2sushiRate > this.state.traderate){
             this.setState({
-              tradetoken : tokenName,
+              tradeTokenAddress : this.state.tokenAddresses[index]["Address"],
+              tradeToken : tokenName,
               tradebuyprice : uni_buy,
               tradesellprice : sushi_sell,
               traderate : uni2sushiRate,
-              direction : true
+              direction : 1
             })
            }
         }
@@ -205,11 +205,12 @@ class Display extends Component {
            sushi2uniRateStyle     = <a className='text-success'> {sushi2uniRate} </a>
            if(sushi2uniRate > this.state.traderate){
             this.setState({
-              tradetoken : tokenName,
+              tradeTokenAddress : this.state.tokenAddresses[index]["Address"],
+              tradeToken : tokenName,
               tradebuyprice : sushi_buy,
               tradesellprice : uni_sell,
               traderate : sushi2uniRate,
-              direction : false
+              direction : 2
             })
            }
         }
@@ -220,12 +221,12 @@ class Display extends Component {
         }
 
         if (this.state.tradeToken == tokenName){
-          if (this.state.direction == true){
+          if (this.state.direction == 1){
             this.setState({
               traderate : uni2sushiRate
             })
           }
-          else if(this.state.direction == false){
+          else if(this.state.direction == 2){
             this.setState({
               traderate : sushi2uniRate
             })
@@ -273,7 +274,7 @@ class Display extends Component {
       const tokenAddressList= {
         Address   : web3.utils.toChecksumAddress(this.state.inputAddress),
       }
-      var userListRef = database.ref('KovanTokenAddress')
+      var userListRef = database.ref('TokenAddress')
       var newUserRef = userListRef.push();
       newUserRef.set(tokenAddressList);
       let buffer = ''
@@ -283,51 +284,51 @@ class Display extends Component {
     }
     async manualExcute(){
       
-      
       if(this.state.traderate < this.state.autoProfit){
         console.log("faild profit")
         return
       }
+
       console.log('successful')
       const privateWeb3    = window.web3;
-      let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
-      let nonce = await privateWeb3.eth.getTransactionCount(this.state.ownerAddress)
 
+
+      let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, this.state.contractAddress);
+
+      let nonce = await privateWeb3.eth.getTransactionCount(this.state.ownerAddress)
+      console.log(nonce,this.state.ownerAddress, this.state.autoAmount, this.state.tradeToken , this.state.direction)
+     console.log(this.state.autoGasLimit, this.state.autoGasValue)
       let tx = {
         from : this.state.ownerAddress,
-        to   : smartContractAddress,
-        data : loanContract.methods.flashloan(this.state.tradetoken, this.state.loanAmount, this.state.direction).encodeABI(),
+        to   : this.state.contractAddress,
+        data : loanContract.methods.flashloan(this.state.autoAmount, this.state.tradeTokenAddress, this.state.direction).encodeABI(),
         gasValue : web3.utils.toWei(this.state.autoGasValue, 'Gwei'),
         gas      : this.state.autoGasLimit,
         nonce    : nonce
       }
 
-      const promise = await privateWeb3.eth.accounts.signTransaction(tx, this.state.ownerPrivateKey)
-      await privateWeb3.eth.sendSignedTransaction(promise.rawTransaction).once('confirmation', () => {
-        let process = this.state.process
-        let message = 'Bob closes the swap.\n'
-        process += message
-        this.setState({
-            process : process
-        })
+        const promise = await privateWeb3.eth.accounts.signTransaction(tx, this.state.ownerPrivateKey)
+        await privateWeb3.eth.sendSignedTransaction(promise.rawTransaction).once('confirmation', () => {
+          
+          const logList= {
+            timeStamp  : new Date().toISOString(),
+            loanAmount : this.state.autoAmount,
+            tradeToken : this.state.tradeToken,
+            tradeRate  : this.state.traderate,
+            direction  : this.state.direction,
+          }
+          var userListRef = database.ref('log')
+          var newUserRef = userListRef.push();
+          newUserRef.set(logList);
+          let buffer = ''
+          this.setState({logList : buffer})
+
         })
         .once('error', (e) => {
             console.log(e)
         })
 
-      const logList= {
-        timeStamp  : new Date().toISOString(),
-        loanAmount : this.state.loanAmount,
-        tradeToken : this.state.tradetoken,
-        tradeRate  : this.state.traderate,
-        direction  : this.state.direction,
-      }
-
-      var userListRef = database.ref('log')
-      var newUserRef = userListRef.push();
-      newUserRef.set(logList);
-      let buffer = ''
-      this.setState({logList : buffer})
+      
     }
 
     autoExcute(){
@@ -498,14 +499,14 @@ class Display extends Component {
         const handleAutoGasValue = (e) => {
           let addLabel  = e.target.value
           this.setState({
-            autoGasLimit : addLabel
+            autoGasValue : addLabel
           })
         }
 
         const handleAutoGasLimit = (e) => {
           let addLabel  = e.target.value
           this.setState({
-            autoGasValue : addLabel
+            autoGasLimit : addLabel
           })
         }
 
@@ -515,17 +516,20 @@ class Display extends Component {
             ownerAddress : addLabel
             
           })
-     
-
-      
         }
 
         const handleOwnerPrivateKey = (e) => {
           let addLabel  = e.target.value
           this.setState({
             ownerPrivateKey : addLabel
-          })
-          
+          }) 
+        }       
+        
+        const handleContractAddress = (e) => {
+          let addLabel  = e.target.value
+          this.setState({
+            contractAddress : addLabel
+          }) 
         }
 
         
@@ -602,22 +606,19 @@ class Display extends Component {
                           <br/><br/><br/><br/>
 
                           <h2> <FiCloudLightning/>   Excution Trading</h2> <hr/><br/><br/>
-                          <p  show = {this.state.showstate}>We can excute Flash Loan Excute on <b>{this.state.tradetoken}</b> Token, buy price is <b>{this.state.tradebuyprice}USDT</b> , sell price is <b>{this.state.tradesellprice} USDT</b>, profit rate is <b>{this.state.traderate} %</b> </p>
+                          <p  show = {this.state.showstate}>We can excute Flash Loan Excute on <b>{this.state.tradeToken}</b> Token, buy price is(Eth/Token) <b>{this.state.tradebuyprice}</b> , sell price is(Eth/Token) <b>{this.state.tradesellprice} </b>, profit rate is <b>{this.state.traderate} %</b> </p><br/><br/>
                           <div className= "row">
                           <div className = "col-1"></div>
                           <div className = "col-10">
                           <InputGroup className="mb-3">
                           <FormControl
-                                  placeholder="Loan Amount"
-                                  aria-label="Loan Amount"
+                                  placeholder="Add Token address  "
+                                  aria-label="Recipient's username"
                                   aria-describedby="basic-addon2"
-                                  defaultValue = {this.state.loanAmount}
-                                  onChange={handleLoanAmount}
-                          />
-                          <Button variant="primary" id="button-addon2"  onClick={()=>this.manualExcute()}>
-                          <FaRegHandPointer/> Manual Excute 
-                          </Button>
-                          <Button variant={this.state.autoExcuteButtonState ? "danger" : "success"} id="button-addon2"  onClick={this.state.autoExcuteButtonState ? ()=>this.stopAutoExcute(): ()=>this.autoExcute()}>
+                                  defaultValue = {this.state.contractAddress}
+                                  onChange={handleContractAddress}
+                                /><br/><br/><br/> 
+                          <Button variant={this.state.autoExcuteButtonState ? "danger" : "success"} id="button-addon2"  onClick={this.state.autoExcuteButtonState ? ()=>this.stopAutoExcute(): ()=>this.autoExcute()}  style={{ width: '100%' }}>
                           <FiCloudLightning/>  {this.state.autoExcuteButtonState ? "Stop Auto Excute" : "Start Auto Excute"} 
                           </Button>
                           </InputGroup>
