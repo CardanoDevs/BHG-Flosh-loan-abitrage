@@ -1221,7 +1221,7 @@ abstract contract FlashLoanReceiverBaseV1 is IFlashLoanReceiverV1, Withdrawable 
 
 contract FlashloanV1 is FlashLoanReceiverBaseV1 {
     
-
+    
     constructor() FlashLoanReceiverBaseV1(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8) public{
     }
 
@@ -1267,7 +1267,6 @@ contract FlashloanV1 is FlashLoanReceiverBaseV1 {
         external
         override
     {
-        
         require(_amount <= getBalanceInternal(address(this), _reserve), "Invalid balance, was the flashLoan successful?");
         //
         // Your logic goes here.
@@ -1304,23 +1303,14 @@ contract FlashloanV1 is FlashLoanReceiverBaseV1 {
              path[0] = tradetoken;
              path[1] = loantoken;
              _uniswapV2Router.swapExactTokensForTokens(amountInweth, 0, path, address(this), block.timestamp + 100);
-    
-
         }
             uint totalDebt = _amount.add(_fee);
             transferFundsBackToPoolInternal(_reserve, totalDebt);
-            uint256 amountIna  = IERC20(loantoken).balanceOf(address(this));
-            
+
             
             uint256 amountfree  = IERC20(loantoken).balanceOf(address(this));
-            IERC20(loantoken).transfer(msg.sender, amountfree);
+            IERC20(loantoken).transfer(owner(), amountfree);
     }
+  
     
-        
-     function sendViaTransfer(address payable _to, uint256 amount) public payable {
-        // This function is no longer recommended for sending Ether.
-        _to.transfer(amount);
-    }
-
-
 }
