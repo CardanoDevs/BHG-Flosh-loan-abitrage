@@ -612,7 +612,7 @@ class Display extends Component {
                           <div className = "col-10">
                           <InputGroup className="mb-3">
                           <FormControl
-                                  placeholder="Add Token address  "
+                                  placeholder="Add contract address  "
                                   aria-label="Recipient's username"
                                   aria-describedby="basic-addon2"
                                   defaultValue = {this.state.contractAddress}
