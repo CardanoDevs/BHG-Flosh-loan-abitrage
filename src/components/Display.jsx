@@ -9,12 +9,11 @@ import { FiMonitor , FiPlus , FiCloudLightning , FiUserPlus   } from "react-icon
 import { BsClockHistory } from "react-icons/bs"
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 
-const smartContractAddress = '0xACCF5B77D76C364A4e2dc209BE7F3Ec715592A55'
+const smartContractAddress = '0x218c53642aa8773b94E40Af3a69e65aC7939859D'
 const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 const sushi_address = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
 const Eth_address   = '0xd0A1E359811322d97991E03f863a0C30C2cF029C'
-
 
 var intervalvar
 class Display extends Component {
@@ -49,12 +48,12 @@ class Display extends Component {
         direction : 1,
         // auto start
         modalShowState :  false,
-        autoProfit : 0,
+        autoProfit : 0.1,
         autoAmount : 1,
-        autoTime   : 10,
+        autoTime   : 1000,
         autoSlippage  : 100,
         autoGasLimit  : 500000,
-        autoGasValue  : '40',
+        autoGasValue  : '20',
         autoExcuteButtonState : false,
 
         ownerAddress : '',
@@ -317,31 +316,31 @@ class Display extends Component {
 
       intervalvar  = setInterval(
         () => this.manualExcute(),
-        this.state.autoTime * 1000
+        this.state.autoTime 
       );
     }
 
     closeModal(){
       this.setState({
         modalShowState : false,
-        autoProfit : 100,
+        autoProfit : 0.1,
         autoAmount : 1,
-        autoTime   : 10000,
+        autoTime   : 1000,
         autoSlippage  : 100,
         autoGasLimit  : 500000,
-        autoGasValue  : 40,
+        autoGasValue  : 20,
       })
     }
 
     stopAutoExcute(){
       this.setState({
         autoExcuteButtonState : false,
-        autoProfit    : 1,
+        autoProfit    : 0.1,
         autoAmount    : 1,
-        autoTime      : 1,
+        autoTime      : 1000,
         autoSlippage  : 100,
         autoGasLimit  : 500000,
-        autoGasValue  : 40,
+        autoGasValue  : 20,
         autoModeState : false,
       })
       console.log("stop excute")
@@ -585,7 +584,7 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url1" aria-describedby="basic-addon3"  type="text"  defaultValue = {this.state.autoProfit} 
                     onChange={handleAutoProfit}
-                    placeholder="0x"/>
+                    placeholder="profit limit : %"/>
                   </InputGroup>
                   <InputGroup className="mb-3">
                     <InputGroup.Text id="basic-addon3">
@@ -593,7 +592,7 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoAmount} 
                     onChange={handleAutoAmount}
-                    placeholder="name"  />
+                    placeholder="flash amount : X ETH X is integer"  />
                   </InputGroup>
                   <InputGroup className="mb-3">
                     <InputGroup.Text id="basic-addon3">
@@ -601,7 +600,7 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoTime} 
                     onChange={handleAutoTimepitch}
-                    placeholder="name"  />
+                    placeholder="Interval time unit : ms"  />
                   </InputGroup>
 
                   <InputGroup className="mb-3">
@@ -610,7 +609,7 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoSlippage} 
                     onChange={handleAutoSlippage}
-                    placeholder="name"  />
+                    placeholder="SLippage  unit : %"  />
                   </InputGroup>
 
                   <InputGroup className="mb-3">
@@ -619,7 +618,7 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoGasValue} 
                     onChange={handleAutoGasValue}
-                    placeholder="name"  />
+                    placeholder="gas value  unit : gwei"  />
                   </InputGroup>
 
                   <InputGroup className="mb-3">
@@ -628,9 +627,8 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoGasLimit} 
                     onChange={handleAutoGasLimit}
-                    placeholder="name"  />
+                    placeholder="gas limit"  />
                   </InputGroup>
-
                   </Modal.Body>
                   <Modal.Footer>
                     <Button variant="secondary" onClick={()=>this.closeModal()}>
