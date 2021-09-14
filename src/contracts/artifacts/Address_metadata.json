@@ -4,34 +4,7 @@
 	},
 	"language": "Solidity",
 	"output": {
-		"abi": [
-			{
-				"inputs": [],
-				"name": "getLendingPool",
-				"outputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "getLendingPoolCore",
-				"outputs": [
-					{
-						"internalType": "address payable",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			}
-		],
+		"abi": [],
 		"devdoc": {
 			"methods": {}
 		},
@@ -41,7 +14,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/FlashLoan.sol": "ILendingPoolAddressesProviderV1"
+			"contracts/FlashLoan.sol": "Address"
 		},
 		"evmVersion": "istanbul",
 		"libraries": {},

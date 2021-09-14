@@ -35,19 +35,15 @@
 			}
 		],
 		"devdoc": {
-			"author": "Aave",
-			"details": "implement this interface to develop a flashloan-compatible flashLoanReceiver contract*",
-			"methods": {},
-			"title": "IFlashLoanReceiver interface"
+			"methods": {}
 		},
 		"userdoc": {
-			"methods": {},
-			"notice": "Interface for the Aave fee IFlashLoanReceiver."
+			"methods": {}
 		}
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/IFlashLoanReceiver.sol": "IFlashLoanReceiverV1"
+			"contracts/FlashLoan.sol": "IFlashLoanReceiverV1"
 		},
 		"evmVersion": "istanbul",
 		"libraries": {},
@@ -61,11 +57,11 @@
 		"remappings": []
 	},
 	"sources": {
-		"contracts/IFlashLoanReceiver.sol": {
-			"keccak256": "0x6a9c90815fc043930c2a2c38fa54a64c34ad448d59b09bf24e3abec396773aaf",
+		"contracts/FlashLoan.sol": {
+			"keccak256": "0x1aa05b4b39d853c057a2cc4070b3724d63cc880a8f423f5f031b7ecce23b41d3",
 			"urls": [
-				"bzz-raw://d686cbd20804e6fe4416f369e607587b1578584c62336614ce5bae47b7999b51",
-				"dweb:/ipfs/QmNkwMJywEdKdvLWmXNiLa1qHKDqMWSVvZUtjs1WjiAHTW"
+				"bzz-raw://8e4dff6e5b2b35c3f9c8927e7ec4e8a3a69e1edd1f09dbd8c2c8c723acaf5c94",
+				"dweb:/ipfs/QmfRS6kunKKf3mCqPsdUgYaNR6VuUWK7PcCHBdwM1NxcbH"
 			]
 		}
 	},

@@ -11,47 +11,90 @@
 					{
 						"indexed": true,
 						"internalType": "address",
-						"name": "_from",
+						"name": "token0",
 						"type": "address"
 					},
 					{
 						"indexed": true,
 						"internalType": "address",
-						"name": "_assetAddress",
+						"name": "token1",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "pair",
 						"type": "address"
 					},
 					{
 						"indexed": false,
 						"internalType": "uint256",
-						"name": "amount",
+						"name": "",
 						"type": "uint256"
 					}
 				],
-				"name": "LogWithdraw",
+				"name": "PairCreated",
 				"type": "event"
 			},
 			{
-				"anonymous": false,
 				"inputs": [
 					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "previousOwner",
-						"type": "address"
-					},
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "allPairs",
+				"outputs": [
 					{
-						"indexed": true,
 						"internalType": "address",
-						"name": "newOwner",
+						"name": "pair",
 						"type": "address"
 					}
 				],
-				"name": "OwnershipTransferred",
-				"type": "event"
+				"stateMutability": "view",
+				"type": "function"
 			},
 			{
 				"inputs": [],
-				"name": "owner",
+				"name": "allPairsLength",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "tokenA",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "tokenB",
+						"type": "address"
+					}
+				],
+				"name": "createPair",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "pair",
+						"type": "address"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "feeTo",
 				"outputs": [
 					{
 						"internalType": "address",
@@ -64,7 +107,50 @@
 			},
 			{
 				"inputs": [],
-				"name": "renounceOwnership",
+				"name": "feeToSetter",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "tokenA",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "tokenB",
+						"type": "address"
+					}
+				],
+				"name": "getPair",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "pair",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "setFeeTo",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -73,47 +159,18 @@
 				"inputs": [
 					{
 						"internalType": "address",
-						"name": "newOwner",
+						"name": "",
 						"type": "address"
 					}
 				],
-				"name": "transferOwnership",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "_assetAddress",
-						"type": "address"
-					}
-				],
-				"name": "withdraw",
+				"name": "setFeeToSetter",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
 			}
 		],
 		"devdoc": {
-			"methods": {
-				"owner()": {
-					"details": "Returns the address of the current owner."
-				},
-				"renounceOwnership()": {
-					"details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner.      * NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
-				},
-				"transferOwnership(address)": {
-					"details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
-				},
-				"withdraw(address)": {
-					"details": "Withdraw asset.",
-					"params": {
-						"_assetAddress": "Asset to be withdrawn."
-					}
-				}
-			}
+			"methods": {}
 		},
 		"userdoc": {
 			"methods": {}
@@ -121,7 +178,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/FlashLoan.sol": "Withdrawable"
+			"contracts/FlashLoan.sol": "IUniswapV2Factory"
 		},
 		"evmVersion": "istanbul",
 		"libraries": {},
