@@ -620,7 +620,6 @@ class Display extends Component {
                     onChange={handleAutoGasValue}
                     placeholder="gas value  unit : gwei"  />
                   </InputGroup>
-
                   <InputGroup className="mb-3">
                     <InputGroup.Text id="basic-addon3">
                       Gas Limit 
