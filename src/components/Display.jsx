@@ -6,51 +6,35 @@ import { erc20abi , abi } from './abi';
 import { MDBDataTableV5 } from 'mdbreact';
 import { database,  } from './firebase/firebase';
 import { FiMonitor , FiPlus , FiCloudLightning , FiUserPlus   } from "react-icons/fi";
-import { FaRegHandPointer } from "react-icons/fa"
 import { BsClockHistory } from "react-icons/bs"
-
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 
+const smartContractAddress = "";
 
-
-
-
-const options = {
-  timeout: 30000,
-  clientConfig: {
-      maxReceivedFrameSize:   100000000,
-      maxReceivedMessageSize: 100000000,
-  },
-  reconnect: {
-      auto: true,
-      delay: 5000,
-      maxAttempts: 15,
-      onTimeout: false,
-  },
-};
-
+// const options = {
+//   timeout: 30000,
+//   clientConfig: {
+//       maxReceivedFrameSize:   100000000,
+//       maxReceivedMessageSize: 100000000,
+//   },
+//   reconnect: {
+//       auto: true,
+//       delay: 5000,
+//       maxAttempts: 15,
+//       onTimeout: false,
+//   },
+// };
 // const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://purple-wispy-flower.quiknode.pro/a2ae460515f061ce64f526edcb10eda275f62585/', options));
 const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 const sushi_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
 const Eth_address   = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
-const smartContractAddress = "";
-
-
-
-// const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
-// const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-// const sushi_address = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
-// const Eth_address   = '0xd0A1E359811322d97991E03f863a0C30C2cF029C'
-
-
 
 var intervalvar
 class Display extends Component {
     constructor(props){
       super(props)
       this.state={
-
         // capture parameter
         uni_buy : 0,
         uni_sell : 0,
