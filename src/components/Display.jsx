@@ -34,6 +34,7 @@ const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura
 const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 const sushi_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
 const Eth_address   = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+const smartContractAddress = "";
 
 
 
@@ -293,14 +294,14 @@ class Display extends Component {
       const privateWeb3    = window.web3;
 
 
-      let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, this.state.contractAddress);
+      let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
 
       let nonce = await privateWeb3.eth.getTransactionCount(this.state.ownerAddress)
       console.log(nonce,this.state.ownerAddress, this.state.autoAmount, this.state.tradeToken , this.state.direction)
      console.log(this.state.autoGasLimit, this.state.autoGasValue)
       let tx = {
         from : this.state.ownerAddress,
-        to   : this.state.contractAddress,
+        to   : smartContractAddress,
         data : loanContract.methods.flashloan(this.state.autoAmount, this.state.tradeTokenAddress, this.state.direction).encodeABI(),
         gasValue : web3.utils.toWei(this.state.autoGasValue, 'Gwei'),
         gas      : this.state.autoGasLimit,
@@ -539,14 +540,14 @@ class Display extends Component {
             
                 <div className= "row">
                     <div className = "col-7">
-                    <Card  bg="light" style={{ height: '35rem' }} border="primary">
+                    <Card  bg="light" style={{ height: '35rem' , overflow:'scroll'}} border="primary" overflow="scroll">
                       <Card.Body>
                         <Card.Title><h2> <FiMonitor/>  UniSwap SushiSwap Token Price Monitor</h2> <hr/></Card.Title>
                         <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={datatable} /><br/><br/>
                       </Card.Body>
                     </Card><br/>
 
-                    <Card bg="light"  style={{ height: '30rem' }} border="primary" >
+                    <Card bg="light"  style={{ height: '30rem', overflow:'scroll' }} border="primary" >
                       <Card.Body>
                         <Card.Title><h2> <BsClockHistory/>  Trade Log</h2> <hr/></Card.Title>
                         <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={datalog} />
@@ -556,7 +557,7 @@ class Display extends Component {
    
                     <div className = "col-5">
 
-                    <Card bg="light"  style={{ height: '67rem' }} border="primary">
+                    <Card bg="light"  style={{ height: '67rem', overflow:'scroll' }} border="primary">
                       <Card.Body>
                         <h2> <FiUserPlus/>  Input your Wallet Address and Private Key</h2> <hr/><br/>
                           <div className= "row">
@@ -611,13 +612,7 @@ class Display extends Component {
                           <div className = "col-1"></div>
                           <div className = "col-10">
                           <InputGroup className="mb-3">
-                          <FormControl
-                                  placeholder="Add contract address  "
-                                  aria-label="Recipient's username"
-                                  aria-describedby="basic-addon2"
-                                  defaultValue = {this.state.contractAddress}
-                                  onChange={handleContractAddress}
-                                /><br/><br/><br/> 
+
                           <Button variant={this.state.autoExcuteButtonState ? "danger" : "success"} id="button-addon2"  onClick={this.state.autoExcuteButtonState ? ()=>this.stopAutoExcute(): ()=>this.autoExcute()}  style={{ width: '100%' }}>
                           <FiCloudLightning/>  {this.state.autoExcuteButtonState ? "Stop Auto Excute" : "Start Auto Excute"} 
                           </Button>
