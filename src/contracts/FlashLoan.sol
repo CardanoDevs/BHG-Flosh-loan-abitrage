@@ -1222,11 +1222,11 @@ abstract contract FlashLoanReceiverBaseV1 is IFlashLoanReceiverV1, Withdrawable 
 contract FlashloanV1 is FlashLoanReceiverBaseV1 {
     
 
-    constructor() FlashLoanReceiverBaseV1(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8) public{
+    constructor() FlashLoanReceiverBaseV1(0x506B0B2CF20FAA8f38a4E2B524EE43e1f4458Cc5) public{
     }
 
     address public uniswap   = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
-    address public sushiswap = 0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F;
+    address public sushiswap = 0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506;
     IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(uniswap);
     IUniswapV2Router02 _sushiswapRouter = IUniswapV2Router02(sushiswap);
     
@@ -1237,7 +1237,7 @@ contract FlashloanV1 is FlashLoanReceiverBaseV1 {
     );
     
     
-    address public  loantoken  =  0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public  loantoken  =  0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD;
     address public  tradetoken;
     uint8   public direction;
     
@@ -1276,47 +1276,45 @@ contract FlashloanV1 is FlashLoanReceiverBaseV1 {
         
         if (direction == 1){
          address[] memory path = new address[](2);  
-         uint256 amountIna  = IERC20(loantoken).balanceOf(address(this));
+         uint256 amountIna  = IERC20(0xd0A1E359811322d97991E03f863a0C30C2cF029C).balanceOf(address(this));
         
-         IERC20(loantoken).approve(uniswap, amountIna);
-         path[0] = loantoken;
+         IERC20(0xd0A1E359811322d97991E03f863a0C30C2cF029C).approve(uniswap, amountIna);
+         path[0] = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
          path[1] = tradetoken;
          _uniswapV2Router.swapExactTokensForTokens(amountIna, 0, path, address(this), block.timestamp + 100);
  
          uint256 amountInweth = IERC20(tradetoken).balanceOf(address(this));
          IERC20(tradetoken).approve(sushiswap, amountInweth);
          path[0] = tradetoken;
-         path[1] = loantoken;
+         path[1] = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
          _sushiswapRouter.swapExactTokensForTokens(amountInweth, 0, path, address(this), block.timestamp + 100);
         }
         
         if (direction == 2){
              address[] memory path = new address[](2);  
-             uint256 amountIna  = IERC20(loantoken).balanceOf(address(this));
+             uint256 amountIna  = IERC20(0xd0A1E359811322d97991E03f863a0C30C2cF029C).balanceOf(address(this));
             
-             IERC20(loantoken).approve(sushiswap, amountIna);
-             path[0] = loantoken;
+             IERC20(0xd0A1E359811322d97991E03f863a0C30C2cF029C).approve(sushiswap, amountIna);
+             path[0] = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
              path[1] = tradetoken;
              _sushiswapRouter.swapExactTokensForTokens(amountIna, 0, path, address(this), block.timestamp + 100);
      
              uint256 amountInweth = IERC20(tradetoken).balanceOf(address(this));
              IERC20(tradetoken).approve(uniswap, amountInweth);
              path[0] = tradetoken;
-             path[1] = loantoken;
+             path[1] = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
              _uniswapV2Router.swapExactTokensForTokens(amountInweth, 0, path, address(this), block.timestamp + 100);
     
 
         }
             uint totalDebt = _amount.add(_fee);
             transferFundsBackToPoolInternal(_reserve, totalDebt);
-            uint256 amountIna  = IERC20(loantoken).balanceOf(address(this));
+
             
-            
-            uint256 amountfree  = IERC20(loantoken).balanceOf(address(this));
-            IERC20(loantoken).transfer(msg.sender, amountfree);
+            uint256 amountfree  = IERC20(0xd0A1E359811322d97991E03f863a0C30C2cF029C).balanceOf(address(this));
+            IERC20(0xd0A1E359811322d97991E03f863a0C30C2cF029C).transfer(owner(), amountfree);
     }
-    
-        
+   
      function sendViaTransfer(address payable _to, uint256 amount) public payable {
         // This function is no longer recommended for sending Ether.
         _to.transfer(amount);

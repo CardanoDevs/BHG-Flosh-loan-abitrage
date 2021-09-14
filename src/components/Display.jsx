@@ -9,7 +9,7 @@ import { FiMonitor , FiPlus , FiCloudLightning , FiUserPlus   } from "react-icon
 import { BsClockHistory } from "react-icons/bs"
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 
-const smartContractAddress = '0x77568Cea1383d43eE84315Bca88598582d0A3fB3'
+const smartContractAddress = '0xACCF5B77D76C364A4e2dc209BE7F3Ec715592A55'
 const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 const sushi_address = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
