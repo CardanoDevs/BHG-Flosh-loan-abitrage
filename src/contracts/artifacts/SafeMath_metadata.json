@@ -4,36 +4,7 @@
 	},
 	"language": "Solidity",
 	"output": {
-		"abi": [
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "_reserve",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "_amount",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "_fee",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bytes",
-						"name": "_params",
-						"type": "bytes"
-					}
-				],
-				"name": "executeOperation",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			}
-		],
+		"abi": [],
 		"devdoc": {
 			"methods": {}
 		},
@@ -43,7 +14,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/1_Storage.sol": "IFlashLoanReceiverV1"
+			"contracts/1_Storage.sol": "SafeMath"
 		},
 		"evmVersion": "istanbul",
 		"libraries": {},

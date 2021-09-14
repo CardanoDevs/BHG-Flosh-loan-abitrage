@@ -8,40 +8,12 @@ import { database,  } from './firebase/firebase';
 import { FiMonitor , FiPlus , FiCloudLightning , FiUserPlus   } from "react-icons/fi";
 import { FaRegHandPointer } from "react-icons/fa"
 import { BsClockHistory } from "react-icons/bs"
-
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
-
 const smartContractAddress = '0x77568Cea1383d43eE84315Bca88598582d0A3fB3'
-
-
-
-const options = {
-  timeout: 30000,
-  clientConfig: {
-      maxReceivedFrameSize:   100000000,
-      maxReceivedMessageSize: 100000000,
-  },
-  reconnect: {
-      auto: true,
-      delay: 5000,
-      maxAttempts: 15,
-      onTimeout: false,
-  },
-};
-
-// // const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://purple-wispy-flower.quiknode.pro/a2ae460515f061ce64f526edcb10eda275f62585/', options));
-// const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
-// const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-// const sushi_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
-// const Eth_address   = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-
-
-
 const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 const sushi_address = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
 const Eth_address   = '0xd0A1E359811322d97991E03f863a0C30C2cF029C'
-
 
 
 var intervalvar
@@ -155,8 +127,7 @@ class Display extends Component {
             })
           }
       });
-  }
-
+   }
 
     async start (){
       for (let index = 0; index < this.state.tokenAddresses.length; index++) {
@@ -292,9 +263,9 @@ class Display extends Component {
       console.log('successful')
       const privateWeb3    = window.web3;
 
-
+      console.log(smartContractAddress)
       let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
-
+      console.log(loanContract)
       let nonce = await privateWeb3.eth.getTransactionCount(this.state.ownerAddress)
       console.log(nonce,this.state.ownerAddress, this.state.autoAmount, this.state.tradeToken , this.state.direction)
      console.log(this.state.autoGasLimit, this.state.autoGasValue)
@@ -536,14 +507,14 @@ class Display extends Component {
             
                 <div className= "row">
                     <div className = "col-7">
-                    <Card  bg="light" style={{ height: '35rem' }} border="primary">
+                    <Card  bg="light" style={{ height: '35rem', overflow:'scroll' }} border="primary">
                       <Card.Body>
                         <Card.Title><h2> <FiMonitor/>  UniSwap SushiSwap Token Price Monitor</h2> <hr/></Card.Title>
                         <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={datatable} /><br/><br/>
                       </Card.Body>
                     </Card><br/>
 
-                    <Card bg="light"  style={{ height: '30rem' }} border="primary" >
+                    <Card bg="light"  style={{ height: '30rem', overflow:'scroll' }} border="primary" >
                       <Card.Body>
                         <Card.Title><h2> <BsClockHistory/>  Trade Log</h2> <hr/></Card.Title>
                         <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={datalog} />

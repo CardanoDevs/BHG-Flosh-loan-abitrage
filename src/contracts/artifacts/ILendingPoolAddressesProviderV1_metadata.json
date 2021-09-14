@@ -33,17 +33,15 @@
 			}
 		],
 		"devdoc": {
-			"methods": {},
-			"title": "ILendingPoolAddressesProvider interface"
+			"methods": {}
 		},
 		"userdoc": {
-			"methods": {},
-			"notice": "provides the interface to fetch the LendingPoolCore address"
+			"methods": {}
 		}
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/ILendingPoolAddressesProvider.sol": "ILendingPoolAddressesProviderV1"
+			"contracts/1_Storage.sol": "ILendingPoolAddressesProviderV1"
 		},
 		"evmVersion": "istanbul",
 		"libraries": {},
@@ -57,11 +55,11 @@
 		"remappings": []
 	},
 	"sources": {
-		"contracts/ILendingPoolAddressesProvider.sol": {
-			"keccak256": "0x0a443f45155bd97f98f99f320dd84d9906498f1569202d1690e00b8aba640529",
+		"contracts/1_Storage.sol": {
+			"keccak256": "0x1aa05b4b39d853c057a2cc4070b3724d63cc880a8f423f5f031b7ecce23b41d3",
 			"urls": [
-				"bzz-raw://09b66693b7c581c5aa323283b41d3539161d6656747a664d6105cc506343d986",
-				"dweb:/ipfs/QmZBSJcLXPYdHxiQbsoHscd32CzqJAJVikDynkezE7gf2e"
+				"bzz-raw://8e4dff6e5b2b35c3f9c8927e7ec4e8a3a69e1edd1f09dbd8c2c8c723acaf5c94",
+				"dweb:/ipfs/QmfRS6kunKKf3mCqPsdUgYaNR6VuUWK7PcCHBdwM1NxcbH"
 			]
 		}
 	},
