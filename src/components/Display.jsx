@@ -62,9 +62,9 @@ class Display extends Component {
         direction : 1,
         // auto start
         modalShowState :  false,
-        autoProfit : 0,
+        autoProfit : 0.1,
         autoAmount : 1,
-        autoTime   : 10,
+        autoTime   : 1000,
         autoSlippage  : 100,
         autoGasLimit  : 500000,
         autoGasValue  : '40',
@@ -334,16 +334,16 @@ class Display extends Component {
 
       intervalvar  = setInterval(
         () => this.manualExcute(),
-        this.state.autoTime * 1000
+        this.state.autoTime
       );
     }
 
     closeModal(){
       this.setState({
         modalShowState : false,
-        autoProfit : 100,
+        autoProfit : 0.1,
         autoAmount : 1,
-        autoTime   : 10000,
+        autoTime   : 1000,
         autoSlippage  : 100,
         autoGasLimit  : 500000,
         autoGasValue  : 40,
@@ -353,9 +353,9 @@ class Display extends Component {
     stopAutoExcute(){
       this.setState({
         autoExcuteButtonState : false,
-        autoProfit    : 1,
+        autoProfit    : 0.1,
         autoAmount    : 1,
-        autoTime      : 1,
+        autoTime      : 1000,
         autoSlippage  : 100,
         autoGasLimit  : 500000,
         autoGasValue  : 40,
@@ -619,7 +619,8 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url1" aria-describedby="basic-addon3"  type="text"  defaultValue = {this.state.autoProfit} 
                     onChange={handleAutoProfit}
-                    placeholder="0x"/>
+                    placeholder="Profit Limit, unit : %"/>
+                    <InputGroup.Text id="basic-addon2">%</InputGroup.Text>
                   </InputGroup>
                   <InputGroup className="mb-3">
                     <InputGroup.Text id="basic-addon3">
@@ -627,7 +628,8 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoAmount} 
                     onChange={handleAutoAmount}
-                    placeholder="name"  />
+                    placeholder="Loan Amount  X ETH X is integer"  />
+                    <InputGroup.Text id="basic-addon2">ETH</InputGroup.Text>
                   </InputGroup>
                   <InputGroup className="mb-3">
                     <InputGroup.Text id="basic-addon3">
@@ -635,7 +637,8 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoTime} 
                     onChange={handleAutoTimepitch}
-                    placeholder="name"  />
+                    placeholder="Interval  Unit : ms"  />
+                    <InputGroup.Text id="basic-addon2">ms</InputGroup.Text>
                   </InputGroup>
 
                   <InputGroup className="mb-3">
@@ -644,7 +647,8 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoSlippage} 
                     onChange={handleAutoSlippage}
-                    placeholder="name"  />
+                    placeholder="Slippage Unit : %"  />
+                    <InputGroup.Text id="basic-addon2">%</InputGroup.Text>
                   </InputGroup>
 
                   <InputGroup className="mb-3">
@@ -653,7 +657,8 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoGasValue} 
                     onChange={handleAutoGasValue}
-                    placeholder="name"  />
+                    placeholder="Gas Value Unit : gwei"  />
+                    <InputGroup.Text id="basic-addon2">Gwei</InputGroup.Text>
                   </InputGroup>
 
                   <InputGroup className="mb-3">
@@ -662,7 +667,7 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoGasLimit} 
                     onChange={handleAutoGasLimit}
-                    placeholder="name"  />
+                    placeholder="Gas Limit"  />
                   </InputGroup>
 
                   </Modal.Body>
