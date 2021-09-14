@@ -6,10 +6,8 @@ import { erc20abi , abi } from './abi';
 import { MDBDataTableV5 } from 'mdbreact';
 import { database,  } from './firebase/firebase';
 import { FiMonitor , FiPlus , FiCloudLightning , FiUserPlus   } from "react-icons/fi";
-import { FaRegHandPointer } from "react-icons/fa"
 import { BsClockHistory } from "react-icons/bs"
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
-
 
 const smartContractAddress = '0x77568Cea1383d43eE84315Bca88598582d0A3fB3'
 const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
@@ -53,7 +51,7 @@ class Display extends Component {
         modalShowState :  false,
         autoProfit : 0,
         autoAmount : 1,
-        autoTime   : 1,
+        autoTime   : 10,
         autoSlippage  : 100,
         autoGasLimit  : 500000,
         autoGasValue  : '40',
@@ -65,8 +63,8 @@ class Display extends Component {
         autoModeState : false,
         walletBalance : '',
 
-
         logs :[],
+        contractAddress : ''
       }
     }
 
@@ -129,7 +127,8 @@ class Display extends Component {
             })
           }
       });
-   }
+  }
+
 
     async start (){
       for (let index = 0; index < this.state.tokenAddresses.length; index++) {
@@ -137,12 +136,10 @@ class Display extends Component {
         let tokenName    = await tokenContract.methods.symbol().call().then(function(res) {  return res;  })
         let tokenDecimal = await tokenContract.methods.decimals().call()
         let mycontract1  = new web3.eth.Contract(abi, uniswap_address)
-
         let uni_buy      = await mycontract1.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
         let uni_sell     = await mycontract1.methods.getAmountsOut(Math.pow(10, 15), [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
         uni_buy          = Math.round(uni_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
         uni_sell         = Math.round( Math.pow(10, tokenDecimal) / uni_sell[1] ) /1000
-
         let mycontract2  = new web3.eth.Contract(abi, sushi_address)
         let sushi_buy      = await mycontract2.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
         let sushi_sell     = await mycontract2.methods.getAmountsOut(Math.pow(10, 15) , [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
@@ -168,11 +165,9 @@ class Display extends Component {
            }
         }
 
-
         else if (uni2sushiRate < 0){
            uni2sushiRateStyle     = <a className='text-danger'> {uni2sushiRate} </a>
         }
-
 
         if (sushi2uniRate >= 0){
            sushi2uniRateStyle     = <a className='text-success'> {sushi2uniRate} </a>
@@ -256,14 +251,18 @@ class Display extends Component {
       this.loadAddresses();
     }
     async manualExcute(){
+      
       if(this.state.traderate < this.state.autoProfit){
         console.log("faild profit")
         return
       }
+
       console.log('successful')
       const privateWeb3    = window.web3;
-      console.log(smartContractAddress)
+
+
       let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
+
       let nonce = await privateWeb3.eth.getTransactionCount(this.state.ownerAddress)
       console.log(nonce,this.state.ownerAddress, this.state.autoAmount, this.state.tradeToken , this.state.direction)
      console.log(this.state.autoGasLimit, this.state.autoGasValue)
@@ -275,8 +274,10 @@ class Display extends Component {
         gas      : this.state.autoGasLimit,
         nonce    : nonce
       }
+
         const promise = await privateWeb3.eth.accounts.signTransaction(tx, this.state.ownerPrivateKey)
         await privateWeb3.eth.sendSignedTransaction(promise.rawTransaction).once('confirmation', () => {
+          
           const logList= {
             timeStamp  : new Date().toISOString(),
             loanAmount : this.state.autoAmount,
@@ -428,13 +429,6 @@ class Display extends Component {
           console.log(this.state.inputAddress)
         }
 
-        const handleLoanAmount = (e) => {
-          let addLabel  = e.target.value
-          this.setState({
-            loanAmount : addLabel
-          })
-        }
-
         const handleAutoProfit = (e) => {
           let addLabel  = e.target.value
           this.setState({
@@ -483,27 +477,20 @@ class Display extends Component {
             ownerAddress : addLabel
             
           })
-     
-
-      
         }
 
         const handleOwnerPrivateKey = (e) => {
           let addLabel  = e.target.value
           this.setState({
             ownerPrivateKey : addLabel
-          })
-          
-        }
-
-        
-
+          }) 
+        }       
         return (
           <div>
             
                 <div className= "row">
                     <div className = "col-7">
-                    <Card  bg="light" style={{ height: '35rem', overflow:'scroll' }} border="primary">
+                    <Card  bg="light" style={{ height: '35rem' , overflow:'scroll'}} border="primary" overflow="scroll">
                       <Card.Body>
                         <Card.Title><h2> <FiMonitor/>  UniSwap SushiSwap Token Price Monitor</h2> <hr/></Card.Title>
                         <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={datatable} /><br/><br/>
@@ -520,7 +507,7 @@ class Display extends Component {
    
                     <div className = "col-5">
 
-                    <Card bg="light"  style={{ height: '67rem' }} border="primary">
+                    <Card bg="light"  style={{ height: '67rem', overflow:'scroll' }} border="primary">
                       <Card.Body>
                         <h2> <FiUserPlus/>  Input your Wallet Address and Private Key</h2> <hr/><br/>
                           <div className= "row">
@@ -575,6 +562,7 @@ class Display extends Component {
                           <div className = "col-1"></div>
                           <div className = "col-10">
                           <InputGroup className="mb-3">
+
                           <Button variant={this.state.autoExcuteButtonState ? "danger" : "success"} id="button-addon2"  onClick={this.state.autoExcuteButtonState ? ()=>this.stopAutoExcute(): ()=>this.autoExcute()}  style={{ width: '100%' }}>
                           <FiCloudLightning/>  {this.state.autoExcuteButtonState ? "Stop Auto Excute" : "Start Auto Excute"} 
                           </Button>
