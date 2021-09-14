@@ -1311,6 +1311,4 @@ contract FlashloanV1 is FlashLoanReceiverBaseV1 {
             uint256 amountfree  = IERC20(loantoken).balanceOf(address(this));
             IERC20(loantoken).transfer(owner(), amountfree);
     }
-  
-    
 }
