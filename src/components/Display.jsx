@@ -51,7 +51,7 @@ class Display extends Component {
         modalShowState :  false,
         autoProfit : 0.1,
         autoAmount : 1,
-        autoTime   : 1000,
+        autoTime   : 30000,
         autoSlippage  : 100,
         autoGasLimit  : 1000000,
         autoGasValue  : '40',
@@ -302,7 +302,7 @@ class Display extends Component {
         autoExcuteButtonState : true,
         modalShowState : false,
       })
-
+      this.manualExcute()
       intervalvar  = setInterval(
         () => this.manualExcute(),
         this.state.autoTime 
@@ -314,7 +314,7 @@ class Display extends Component {
         modalShowState : false,
         autoProfit : 0.1,
         autoAmount : 1,
-        autoTime   : 1000,
+        autoTime   : 30000,
         autoSlippage  : 100,
         autoGasLimit  : 1000000,
         autoGasValue  : 40,
@@ -326,7 +326,7 @@ class Display extends Component {
         autoExcuteButtonState : false,
         autoProfit    : 0.1,
         autoAmount    : 1,
-        autoTime      : 1000,
+        autoTime      : 30000,
         autoSlippage  : 100,
         autoGasLimit  : 1000000,
         autoGasValue  : 40,
