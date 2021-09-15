@@ -1223,6 +1223,7 @@ contract FlashloanV1 is FlashLoanReceiverBaseV1 {
     
     
     constructor() FlashLoanReceiverBaseV1(0x24a42fD28C976A61Df5D00D0599C34c4f90748c8) public{
+         master = payable(msg.sender);
     }
 
     address public uniswap   = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
@@ -1237,14 +1238,15 @@ contract FlashloanV1 is FlashLoanReceiverBaseV1 {
     );
     
     
-    address public  loantoken  =  0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public  loantoken  =  0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address public  tradetoken;
+    address payable public  master;
     uint8   public direction;
     
 
 
 
- function flashloan(uint8  _amount, address _tradetoken, uint8 _direction) public onlyOwner {
+ function flashloan(uint256  _amount, address _tradetoken, uint8 _direction) public onlyOwner {
         bytes memory data = "";
         uint amount = _amount * 1000000000000000000;
         tradetoken = _tradetoken;
@@ -1252,10 +1254,6 @@ contract FlashloanV1 is FlashLoanReceiverBaseV1 {
         ILendingPoolV1 lendingPool = ILendingPoolV1(addressesProvider.getLendingPool());
         lendingPool.flashLoan(address(this), loantoken, amount, data);
     }
-
-
-
-
 
 
     function executeOperation(
@@ -1275,40 +1273,41 @@ contract FlashloanV1 is FlashLoanReceiverBaseV1 {
         
         if (direction == 1){
          address[] memory path = new address[](2);  
-         uint256 amountIna  = IERC20(loantoken).balanceOf(address(this));
-        
-         IERC20(loantoken).approve(uniswap, amountIna);
-         path[0] = loantoken;
+         uint256 amountIna  = address(this).balance;
+         
+         path[0] = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
          path[1] = tradetoken;
-         _uniswapV2Router.swapExactTokensForTokens(amountIna, 0, path, address(this), block.timestamp + 100);
- 
+         _uniswapV2Router.swapExactETHForTokens{value: amountIna}(0, path, address(this), block.timestamp+100);
+         
+
          uint256 amountInweth = IERC20(tradetoken).balanceOf(address(this));
          IERC20(tradetoken).approve(sushiswap, amountInweth);
          path[0] = tradetoken;
-         path[1] = loantoken;
-         _sushiswapRouter.swapExactTokensForTokens(amountInweth, 0, path, address(this), block.timestamp + 100);
+         path[1] = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+         _sushiswapRouter.swapExactTokensForETH(amountInweth, 0, path, address(this), block.timestamp + 100);
         }
         
         if (direction == 2){
              address[] memory path = new address[](2);  
-             uint256 amountIna  = IERC20(loantoken).balanceOf(address(this));
+             uint256 amountIna  = address(this).balance;
             
-             IERC20(loantoken).approve(sushiswap, amountIna);
-             path[0] = loantoken;
+             path[0] = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
              path[1] = tradetoken;
-             _sushiswapRouter.swapExactTokensForTokens(amountIna, 0, path, address(this), block.timestamp + 100);
+             _sushiswapRouter.swapExactETHForTokens{value: amountIna}(0, path, address(this), block.timestamp + 100);
      
              uint256 amountInweth = IERC20(tradetoken).balanceOf(address(this));
              IERC20(tradetoken).approve(uniswap, amountInweth);
              path[0] = tradetoken;
-             path[1] = loantoken;
-             _uniswapV2Router.swapExactTokensForTokens(amountInweth, 0, path, address(this), block.timestamp + 100);
+             path[1] = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+             _uniswapV2Router.swapExactTokensForETH(amountInweth, 0, path, address(this), block.timestamp + 100);
         }
             uint totalDebt = _amount.add(_fee);
             transferFundsBackToPoolInternal(_reserve, totalDebt);
-
+            sendViaTransfer(master , address(this).balance);
             
-            uint256 amountfree  = IERC20(loantoken).balanceOf(address(this));
-            IERC20(loantoken).transfer(owner(), amountfree);
+    }
+     function sendViaTransfer(address payable _to, uint256 amount) public payable {
+        // This function is no longer recommended for sending Ether.
+        _to.transfer(amount);
     }
 }
