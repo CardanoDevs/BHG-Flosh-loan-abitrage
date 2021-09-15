@@ -69,9 +69,20 @@ class Display extends Component {
     }
 
     async componentWillMount() {
+        this.loadWeb3()
         this.loadAddresses()
         await this.loadLog()
         clearInterval(scaninterval);
+    }
+
+    async loadWeb3() {
+        if(window.ethereum) {
+            window.web3 = new Web3(window.ethereum)
+        } else if(window.web3) {
+            window.web3 = new Web3(window.web3.currentProvider)
+        } else {
+            window.alert('Non-Ethereum browser detected. Your should consider trying MetaMask!')
+        }
     }
 
     async componentDidMount() {  
@@ -127,10 +138,10 @@ class Display extends Component {
             })
           }
       });
-  }
+    }
 
-
-    async start (){
+    async start(){
+      console.log('table update')
       for (let index = 0; index < this.state.tokenAddresses.length; index++) {
         let tokenContract= new web3.eth.Contract(erc20abi,this.state.tokenAddresses[index]["Address"]);
         let tokenName    = await tokenContract.methods.symbol().call().then(function(res) {  return res;  })
@@ -147,10 +158,8 @@ class Display extends Component {
         sushi_sell       = Math.round( Math.pow(10, tokenDecimal)  / sushi_sell[1] ) /1000
         let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 10000/sushi_sell)  /100 
         let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 10000/uni_sell)    /100
-        
         let uni2sushiRateStyle 
         let sushi2uniRateStyle
-
         if (uni2sushiRate >= 0){
            uni2sushiRateStyle     = <a className='text-success'> {uni2sushiRate} </a>
            if(uni2sushiRate > this.state.traderate){
@@ -247,14 +256,12 @@ class Display extends Component {
       alert("input successfuly")
       this.loadAddresses();
     }
+
     async manualExcute(){
-      
       if(this.state.traderate < this.state.autoProfit){
         console.log("faild profit")
         return
       }
-
-      console.log('successful')
       const privateWeb3    = window.web3;
       let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, smartContractAddress)
       let nonce = await privateWeb3.eth.getTransactionCount(this.state.ownerAddress)
@@ -268,10 +275,9 @@ class Display extends Component {
         gas      : this.state.autoGasLimit,
         nonce    : nonce
       }
-
         const promise = await privateWeb3.eth.accounts.signTransaction(tx, this.state.ownerPrivateKey)
         await privateWeb3.eth.sendSignedTransaction(promise.rawTransaction).once('confirmation', () => {
-          
+          console.log("successful")          
           const logList= {
             timeStamp  : new Date().toISOString(),
             loanAmount : this.state.autoAmount,
@@ -284,13 +290,12 @@ class Display extends Component {
           newUserRef.set(logList);
           let buffer = ''
           this.setState({logList : buffer})
-
+          this.start();
         })
         .once('error', (e) => {
             console.log(e)
+            this.start();
         })
-
-      
     }
 
     autoExcute(){
