@@ -136,9 +136,9 @@
 			{
 				"inputs": [
 					{
-						"internalType": "uint8",
+						"internalType": "uint256",
 						"name": "_amount",
-						"type": "uint8"
+						"type": "uint256"
 					},
 					{
 						"internalType": "address",
@@ -171,6 +171,19 @@
 			},
 			{
 				"inputs": [],
+				"name": "master",
+				"outputs": [
+					{
+						"internalType": "address payable",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "owner",
 				"outputs": [
 					{
@@ -187,6 +200,24 @@
 				"name": "renounceOwnership",
 				"outputs": [],
 				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address payable",
+						"name": "_to",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "sendViaTransfer",
+				"outputs": [],
+				"stateMutability": "payable",
 				"type": "function"
 			},
 			{
@@ -284,7 +315,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/1_Storage.sol": "FlashloanV1"
+			"contracts/3_Ballot.sol": "FlashloanV1"
 		},
 		"evmVersion": "istanbul",
 		"libraries": {},
@@ -298,11 +329,11 @@
 		"remappings": []
 	},
 	"sources": {
-		"contracts/1_Storage.sol": {
-			"keccak256": "0x9efe301af613e0e052918b1759f13b408193b2532f19dabd46823442034a3cec",
+		"contracts/3_Ballot.sol": {
+			"keccak256": "0xd665133f87723bc3c8bf0ea9fd7ebc1c5aa235339da61174d49cc6979ea8abb0",
 			"urls": [
-				"bzz-raw://04b6151f8c93ee871c311e231f921f515e5947b53473c731fb849245be9a8ad2",
-				"dweb:/ipfs/QmNMb1NAeKHvC3J1uhXGwc4cXYQnfj8rMhnLrpm45NnHty"
+				"bzz-raw://c93bf857f0566536536f27792dcac38c32533ff0291a919aeb34ebfcd3975513",
+				"dweb:/ipfs/QmWeCMVyTgYgUhbQ5gGrcE6p462Rkn9wyG1Atp9B6wbpKV"
 			]
 		}
 	},

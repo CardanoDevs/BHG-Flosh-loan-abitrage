@@ -9,13 +9,14 @@ import { FiMonitor , FiPlus , FiCloudLightning , FiUserPlus   } from "react-icon
 import { BsClockHistory } from "react-icons/bs"
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 
-const smartContractAddress = '0x218c53642aa8773b94E40Af3a69e65aC7939859D'
+const smartContractAddress = '0xC5e96aC133a3314c6a822A9556f2Faa0a938425c'
 const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 const sushi_address = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
 const Eth_address   = '0xd0A1E359811322d97991E03f863a0C30C2cF029C'
 
 var intervalvar
+var scaninterval
 class Display extends Component {
     constructor(props){
       super(props)
@@ -52,8 +53,8 @@ class Display extends Component {
         autoAmount : 1,
         autoTime   : 1000,
         autoSlippage  : 100,
-        autoGasLimit  : 500000,
-        autoGasValue  : '20',
+        autoGasLimit  : 1000000,
+        autoGasValue  : '40',
         autoExcuteButtonState : false,
 
         ownerAddress : '',
@@ -70,11 +71,11 @@ class Display extends Component {
     async componentWillMount() {
         this.loadAddresses()
         await this.loadLog()
-        clearInterval(this.timerID);
+        clearInterval(scaninterval);
     }
 
     async componentDidMount() {  
-      this.timerID = setInterval(
+      scaninterval = setInterval(
         () => this.start(),
         5000
       );
@@ -198,10 +199,7 @@ class Display extends Component {
               traderate : sushi2uniRate
             })
           }
-
         }
-
-
         let tableData = {
           tokenName     : tokenName,
           tokenDecimal  : tokenDecimal,
@@ -258,13 +256,10 @@ class Display extends Component {
 
       console.log('successful')
       const privateWeb3    = window.web3;
-
-
-      let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
-
+      let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, smartContractAddress)
       let nonce = await privateWeb3.eth.getTransactionCount(this.state.ownerAddress)
       console.log(nonce,this.state.ownerAddress, this.state.autoAmount, this.state.tradeToken , this.state.direction)
-     console.log(this.state.autoGasLimit, this.state.autoGasValue)
+      console.log(this.state.autoGasLimit, this.state.autoGasValue)
       let tx = {
         from : this.state.ownerAddress,
         to   : smartContractAddress,
@@ -327,8 +322,8 @@ class Display extends Component {
         autoAmount : 1,
         autoTime   : 1000,
         autoSlippage  : 100,
-        autoGasLimit  : 500000,
-        autoGasValue  : 20,
+        autoGasLimit  : 1000000,
+        autoGasValue  : 40,
       })
     }
 
@@ -339,8 +334,8 @@ class Display extends Component {
         autoAmount    : 1,
         autoTime      : 1000,
         autoSlippage  : 100,
-        autoGasLimit  : 500000,
-        autoGasValue  : 20,
+        autoGasLimit  : 1000000,
+        autoGasValue  : 40,
         autoModeState : false,
       })
       console.log("stop excute")
