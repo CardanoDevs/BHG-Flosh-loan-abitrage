@@ -64,7 +64,7 @@ class Display extends Component {
         modalShowState :  false,
         autoProfit : 0.1,
         autoAmount : 1,
-        autoTime   : 1000,
+        autoTime   : 30000,
         autoSlippage  : 100,
         autoGasLimit  : 500000,
         autoGasValue  : '40',
@@ -273,10 +273,7 @@ class Display extends Component {
         console.log("faild profit")
         return
       }
-
-      
-      const privateWeb3    = window.web3;
-
+      console.log("send transaction")
 
       let loanContract  = await web3.eth.Contract(LoanContract.abi, smartContractAddress);
 
@@ -331,7 +328,7 @@ class Display extends Component {
         autoExcuteButtonState : true,
         modalShowState : false,
       })
-
+      this.manualExcute()
       intervalvar  = setInterval(
         () => this.manualExcute(),
         this.state.autoTime
@@ -343,7 +340,7 @@ class Display extends Component {
         modalShowState : false,
         autoProfit : 0.1,
         autoAmount : 1,
-        autoTime   : 1000,
+        autoTime   : 30000,
         autoSlippage  : 100,
         autoGasLimit  : 500000,
         autoGasValue  : 40,
@@ -355,7 +352,7 @@ class Display extends Component {
         autoExcuteButtonState : false,
         autoProfit    : 0.1,
         autoAmount    : 1,
-        autoTime      : 1000,
+        autoTime      : 30000,
         autoSlippage  : 100,
         autoGasLimit  : 500000,
         autoGasValue  : 40,
