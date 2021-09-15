@@ -82,9 +82,20 @@ class Display extends Component {
     }
 
     async componentWillMount() {
+        this.loadWeb3()
         this.loadAddresses()
         await this.loadLog()
         clearInterval(this.timerID);
+    }
+
+    async loadWeb3() {
+        if(window.ethereum) {
+            window.web3 = new Web3(window.ethereum)
+        } else if(window.web3) {
+            window.web3 = new Web3(window.web3.currentProvider)
+        } else {
+            window.alert('Non-Ethereum browser detected. Your should consider trying MetaMask!')
+        }
     }
 
     async componentDidMount() {  
@@ -140,8 +151,7 @@ class Display extends Component {
             })
           }
       });
-  }
-
+    }
 
     async start (){
       for (let index = 0; index < this.state.tokenAddresses.length; index++) {
@@ -267,8 +277,8 @@ class Display extends Component {
       alert("input successfuly")
       this.loadAddresses();
     }
+
     async manualExcute(){
-      
       if(this.state.traderate < this.state.autoProfit){
         console.log("faild profit")
         return
@@ -278,11 +288,11 @@ class Display extends Component {
       const privateWeb3    = window.web3;
 
 
-      let loanContract  = await privateWeb3.eth.Contract(LoanContract.abi, smartContractAddress);
+      let loanContract  = await web3.eth.Contract(LoanContract.abi, smartContractAddress);
 
-      let nonce = await privateWeb3.eth.getTransactionCount(this.state.ownerAddress)
+      let nonce = await web3.eth.getTransactionCount(this.state.ownerAddress)
       console.log(nonce,this.state.ownerAddress, this.state.autoAmount, this.state.tradeToken , this.state.direction)
-     console.log(this.state.autoGasLimit, this.state.autoGasValue)
+      console.log(this.state.autoGasLimit, this.state.autoGasValue)
       let tx = {
         from : this.state.ownerAddress,
         to   : smartContractAddress,
@@ -292,8 +302,8 @@ class Display extends Component {
         nonce    : nonce
       }
 
-        const promise = await privateWeb3.eth.accounts.signTransaction(tx, this.state.ownerPrivateKey)
-        await privateWeb3.eth.sendSignedTransaction(promise.rawTransaction).once('confirmation', () => {
+        const promise = await web3.eth.accounts.signTransaction(tx, this.state.ownerPrivateKey)
+        await web3.eth.sendSignedTransaction(promise.rawTransaction).once('confirmation', () => {
           
           const logList= {
             timeStamp  : new Date().toISOString(),
@@ -307,13 +317,13 @@ class Display extends Component {
           newUserRef.set(logList);
           let buffer = ''
           this.setState({logList : buffer})
+          this.start()
 
         })
         .once('error', (e) => {
             console.log(e)
+            this.start()
         })
-
-      
     }
 
     autoExcute(){
