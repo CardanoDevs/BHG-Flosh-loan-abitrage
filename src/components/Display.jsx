@@ -154,6 +154,7 @@ class Display extends Component {
     }
 
     async start (){
+      console.log("update table")
       for (let index = 0; index < this.state.tokenAddresses.length; index++) {
         let tokenContract= new web3.eth.Contract(erc20abi,this.state.tokenAddresses[index]["Address"]);
         let tokenName    = await tokenContract.methods.symbol().call().then(function(res) {  return res;  })
@@ -284,7 +285,7 @@ class Display extends Component {
         return
       }
 
-      console.log('successful')
+      
       const privateWeb3    = window.web3;
 
 
@@ -304,7 +305,7 @@ class Display extends Component {
 
         const promise = await web3.eth.accounts.signTransaction(tx, this.state.ownerPrivateKey)
         await web3.eth.sendSignedTransaction(promise.rawTransaction).once('confirmation', () => {
-          
+          console.log('successful')
           const logList= {
             timeStamp  : new Date().toISOString(),
             loanAmount : this.state.autoAmount,
