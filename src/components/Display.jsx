@@ -322,7 +322,6 @@ class Display extends Component {
           modalShowState : true,
         })
     }
-
     autoExcuteStart(){
       this.setState({
         autoExcuteButtonState : true,
@@ -334,7 +333,6 @@ class Display extends Component {
         this.state.autoTime
       );
     }
-
     closeModal(){
       this.setState({
         modalShowState : false,
