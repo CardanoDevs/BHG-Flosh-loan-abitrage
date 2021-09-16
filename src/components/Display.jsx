@@ -84,6 +84,8 @@ class Display extends Component {
     async componentWillMount() {
         await this.loadLog()
         await this.loadAddresses()
+        await this.sleep(5000)
+        await this.start()
     }
 
     async loadAddresses(){
@@ -104,12 +106,11 @@ class Display extends Component {
             this.setState({
               tokenAddresses : walletList
             })
-            this.start()
         }
       });
     }
 
-    loadLog(){
+    async loadLog(){
       console.log("start load log")
       database.ref('log/').get().then((snapshot) => {
           if (snapshot.exists) {
@@ -142,9 +143,6 @@ class Display extends Component {
       for (let index = 0; index < this.state.tokenAddresses.length; index++) {
         console.log(index)
       try{
-       
-
-
         let tokenContract= new web3.eth.Contract(erc20abi,this.state.tokenAddresses[index]["Address"]);
         let tokenName    = await tokenContract.methods.symbol().call().then(function(res) {  return res;  })
         let tokenDecimal = await tokenContract.methods.decimals().call()
@@ -384,6 +382,10 @@ class Display extends Component {
       })
       console.log("stop excute")
       clearInterval(intervalvar)
+    }
+
+    async sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
     }
   
     render() {
