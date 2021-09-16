@@ -16,7 +16,6 @@ const sushi_address = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
 const Eth_address   = '0xd0A1E359811322d97991E03f863a0C30C2cF029C'
 
 var intervalvar
-var scaninterval
 class Display extends Component {
     constructor(props){
       super(props)
@@ -71,7 +70,8 @@ class Display extends Component {
     async componentWillMount() {
         await this.loadLog()
         await this.loadAddresses()
-            
+        await this.sleep(3000)
+        await this.start()
     }
 
     async loadAddresses(){
@@ -82,7 +82,6 @@ class Display extends Component {
             if (newArray) {
                 Object.keys(newArray).map((key) => {
                     const value = newArray[key];
-
                     walletList.push({
                             Address : web3.utils.toChecksumAddress(value.Address),
                     })
@@ -91,7 +90,6 @@ class Display extends Component {
             this.setState({
               tokenAddresses : walletList
             })
-            this.start()
           }
       });
     }
@@ -125,8 +123,7 @@ class Display extends Component {
 
     async start (){
       console.log("update table")
-
-      for (let index = 0; index < this.state.tokenAddresses.length; index++) {
+      for(let index = 0; index < this.state.tokenAddresses.length; index++) {
         console.log(index)
       try{
         let tokenContract= new web3.eth.Contract(erc20abi,this.state.tokenAddresses[index]["Address"]);
@@ -257,14 +254,12 @@ class Display extends Component {
       }
       for (let index = 0; index < this.state.tokenAddresses.length; index++) {
         if(this.state.tokenAddresses[index]["Address"] == web3.utils.toChecksumAddress(this.state.inputAddress)){
-          
           let buffer = ''
           this.setState({inputAddress : buffer})
           alert("Aleady exist")
           return
         } 
       }
-
       const tokenAddressList= {
         Address   : web3.utils.toChecksumAddress(this.state.inputAddress),
       }
@@ -311,11 +306,9 @@ class Display extends Component {
           let buffer = ''
           this.setState({logList : buffer})
           this.loadLog()
-          this.start();
         })
         .once('error', (e) => {
             console.log(e)
-            this.start();
         })
     }
 
@@ -368,6 +361,10 @@ class Display extends Component {
       clearInterval(intervalvar)
     }
   
+    sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
     render() {
         var rowstable = this.state.tableDatas
         const datatable = {
