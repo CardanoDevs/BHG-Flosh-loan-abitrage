@@ -279,6 +279,7 @@ class Display extends Component {
           newUserRef.set(logList);
           let buffer = ''
           this.setState({logList : buffer})
+          this.loadLog()
           this.start();
         })
         .once('error', (e) => {
