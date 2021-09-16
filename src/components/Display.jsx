@@ -69,16 +69,9 @@ class Display extends Component {
     }
 
     async componentWillMount() {
-        this.loadAddresses()
         await this.loadLog()
-        clearInterval(scaninterval);
-    }
-
-    async componentDidMount() {  
-      scaninterval = setInterval(
-        () => this.start(),
-        5000
-      );
+        await this.loadAddresses()
+            
     }
 
     async loadAddresses(){
@@ -99,12 +92,13 @@ class Display extends Component {
               tokenAddresses : walletList
             })
             this.start()
-        }
+          }
       });
     }
 
-    loadLog(){
-      database.ref('log/').get().then((snapshot) => {
+    async loadLog(){
+      console.log("loadlog")
+      database.ref('testlog/').get().then((snapshot) => {
           if (snapshot.exists) {
             var logs = [];
               const newArray = snapshot.val();
@@ -132,94 +126,98 @@ class Display extends Component {
     async start(){
       console.log('table update')
       for (let index = 0; index < this.state.tokenAddresses.length; index++) {
-        let tokenContract= new web3.eth.Contract(erc20abi,this.state.tokenAddresses[index]["Address"]);
-        let tokenName    = await tokenContract.methods.symbol().call().then(function(res) {  return res;  })
-        let tokenDecimal = await tokenContract.methods.decimals().call()
-        let mycontract1  = new web3.eth.Contract(abi, uniswap_address)
-        let uni_buy      = await mycontract1.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
-        let uni_sell     = await mycontract1.methods.getAmountsOut(Math.pow(10, 15), [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
-        uni_buy          = Math.round(uni_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
-        uni_sell         = Math.round( Math.pow(10, tokenDecimal) / uni_sell[1] ) /1000
-        let mycontract2  = new web3.eth.Contract(abi, sushi_address)
-        let sushi_buy      = await mycontract2.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
-        let sushi_sell     = await mycontract2.methods.getAmountsOut(Math.pow(10, 15) , [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
-        sushi_buy          = Math.round(sushi_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
-        sushi_sell       = Math.round( Math.pow(10, tokenDecimal)  / sushi_sell[1] ) /1000
-        let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 10000/sushi_sell)  /100 
-        let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 10000/uni_sell)    /100
-        let uni2sushiRateStyle 
-        let sushi2uniRateStyle
-        if (uni2sushiRate >= 0){
-           uni2sushiRateStyle     = <a className='text-success'> {uni2sushiRate} </a>
-           if(uni2sushiRate > this.state.traderate){
-            this.setState({
-              tradeTokenAddress : this.state.tokenAddresses[index]["Address"],
-              tradeToken : tokenName,
-              tradebuyprice : uni_buy,
-              tradesellprice : sushi_sell,
-              traderate : uni2sushiRate,
-              direction : 1
-            })
-           }
-        }
-
-        else if (uni2sushiRate < 0){
-           uni2sushiRateStyle     = <a className='text-danger'> {uni2sushiRate} </a>
-        }
-
-        if (sushi2uniRate >= 0){
-           sushi2uniRateStyle     = <a className='text-success'> {sushi2uniRate} </a>
-           if(sushi2uniRate > this.state.traderate){
-            this.setState({
-              tradeTokenAddress : this.state.tokenAddresses[index]["Address"],
-              tradeToken : tokenName,
-              tradebuyprice : sushi_buy,
-              tradesellprice : uni_sell,
-              traderate : sushi2uniRate,
-              direction : 2
-            })
-           }
-        }
-
-
-        else if (sushi2uniRate < 0){
-           sushi2uniRateStyle     = <a className='text-danger'> {sushi2uniRate} </a>
-        }
-
-        if (this.state.tradeToken == tokenName){
-          if (this.state.direction == 1){
-            this.setState({
-              traderate : uni2sushiRate
-            })
+        console.log(index)
+        try{
+          let tokenContract= new web3.eth.Contract(erc20abi,this.state.tokenAddresses[index]["Address"]);
+          let tokenName    = await tokenContract.methods.symbol().call().then(function(res) {  return res;  })
+          let tokenDecimal = await tokenContract.methods.decimals().call()
+          let mycontract1  = new web3.eth.Contract(abi, uniswap_address)
+          let uni_buy      = await mycontract1.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
+          let uni_sell     = await mycontract1.methods.getAmountsOut(Math.pow(10, 15), [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
+          uni_buy          = Math.round(uni_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
+          uni_sell         = Math.round( Math.pow(10, tokenDecimal) / uni_sell[1] ) /1000
+          let mycontract2  = new web3.eth.Contract(abi, sushi_address)
+          let sushi_buy      = await mycontract2.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
+          let sushi_sell     = await mycontract2.methods.getAmountsOut(Math.pow(10, 15) , [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
+          sushi_buy          = Math.round(sushi_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
+          sushi_sell       = Math.round( Math.pow(10, tokenDecimal)  / sushi_sell[1] ) /1000
+          let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 10000/sushi_sell)  /100 
+          let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 10000/uni_sell)    /100
+          let uni2sushiRateStyle 
+          let sushi2uniRateStyle
+          if (uni2sushiRate >= 0){
+             uni2sushiRateStyle     = <a className='text-success'> {uni2sushiRate} </a>
+             if(uni2sushiRate > this.state.traderate){
+              this.setState({
+                tradeTokenAddress : this.state.tokenAddresses[index]["Address"],
+                tradeToken : tokenName,
+                tradebuyprice : uni_buy,
+                tradesellprice : sushi_sell,
+                traderate : uni2sushiRate,
+                direction : 1
+              })
+             }
           }
-          else if(this.state.direction == 2){
-            this.setState({
-              traderate : sushi2uniRate
-            })
+          else if (uni2sushiRate < 0){
+             uni2sushiRateStyle     = <a className='text-danger'> {uni2sushiRate} </a>
           }
+  
+          if (sushi2uniRate >= 0){
+             sushi2uniRateStyle     = <a className='text-success'> {sushi2uniRate} </a>
+             if(sushi2uniRate > this.state.traderate){
+              this.setState({
+                tradeTokenAddress : this.state.tokenAddresses[index]["Address"],
+                tradeToken : tokenName,
+                tradebuyprice : sushi_buy,
+                tradesellprice : uni_sell,
+                traderate : sushi2uniRate,
+                direction : 2
+              })
+             }
+          }
+          else if (sushi2uniRate < 0){
+             sushi2uniRateStyle     = <a className='text-danger'> {sushi2uniRate} </a>
+          }
+  
+          if (this.state.tradeToken == tokenName){
+            if (this.state.direction == 1){
+              this.setState({
+                traderate : uni2sushiRate
+              })
+            }
+            else if(this.state.direction == 2){
+              this.setState({
+                traderate : sushi2uniRate
+              })
+            }
+          }
+          let tableData = {
+            tokenName     : tokenName,
+            tokenDecimal  : tokenDecimal,
+            uni_buy      : uni_buy,
+            uni_sell      : uni_sell,
+            sushi_buy    : sushi_buy,
+            sushi_sell    : sushi_sell,
+            uni2sushiRate : uni2sushiRate ,
+            sushi2uniRate : sushi2uniRate ,
+            uni2sushiRateStyle : uni2sushiRateStyle,
+            sushi2uniRateStyle : sushi2uniRateStyle
+          }
+          let tableDatas = this.state.tableDatas
+          tableDatas[index] = tableData
+          this.setState({
+            tableDatas : tableDatas
+          })
+        } catch(err){
+          index = index
         }
-        let tableData = {
-          tokenName     : tokenName,
-          tokenDecimal  : tokenDecimal,
-          uni_buy      : uni_buy,
-          uni_sell      : uni_sell,
-          sushi_buy    : sushi_buy,
-          sushi_sell    : sushi_sell,
-          uni2sushiRate : uni2sushiRate ,
-          sushi2uniRate : sushi2uniRate ,
-          uni2sushiRateStyle : uni2sushiRateStyle,
-          sushi2uniRateStyle : sushi2uniRateStyle
+        if(index == this.state.tokenAddresses.length - 1){
+          this.start()
         }
-        let tableDatas = this.state.tableDatas
-        tableDatas[index] = tableData
-        this.setState({
-          tableDatas : tableDatas
-        })
       }
     }
 
     async addAddress(){
-
       if(this.state.inputAddress==""){
         alert("Please check  Address")
         return
@@ -274,7 +272,7 @@ class Display extends Component {
             tradeRate  : this.state.traderate,
             direction  : this.state.direction,
           }
-          var userListRef = database.ref('log')
+          var userListRef = database.ref('testlog')
           var newUserRef = userListRef.push();
           newUserRef.set(logList);
           let buffer = ''
