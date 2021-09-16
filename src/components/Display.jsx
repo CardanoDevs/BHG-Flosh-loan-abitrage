@@ -269,7 +269,6 @@ class Display extends Component {
     }
 
     async addAddress(){
-
       if(this.state.inputAddress==""){
         alert("Please check  Address")
         return
@@ -316,7 +315,6 @@ class Display extends Component {
         gas      : this.state.autoGasLimit,
         nonce    : nonce
       }
-
         const promise = await web3.eth.accounts.signTransaction(tx, this.state.ownerPrivateKey)
         await web3.eth.sendSignedTransaction(promise.rawTransaction).once('confirmation', () => {
           console.log('successful')
@@ -332,12 +330,10 @@ class Display extends Component {
           newUserRef.set(logList);
           let buffer = ''
           this.setState({logList : buffer})
-          this.start()
           this.loadlog()
         })
         .once('error', (e) => {
             console.log(e)
-            this.start()
         })
     }
 
@@ -350,6 +346,7 @@ class Display extends Component {
           modalShowState : true,
         })
     }
+
     autoExcuteStart(){
       this.setState({
         autoExcuteButtonState : true,
@@ -361,6 +358,7 @@ class Display extends Component {
         this.state.autoTime
       );
     }
+    
     closeModal(){
       this.setState({
         modalShowState : false,
