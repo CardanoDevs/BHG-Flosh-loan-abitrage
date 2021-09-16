@@ -305,7 +305,7 @@ class Display extends Component {
           let buffer = ''
           this.setState({logList : buffer})
           this.start()
-
+          this.loadlog()
         })
         .once('error', (e) => {
             console.log(e)
