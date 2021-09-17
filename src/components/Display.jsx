@@ -84,13 +84,13 @@ class Display extends Component {
     async componentWillMount() {
         await this.loadLog()
         await this.loadAddresses()
-        await this.sleep(5000)
+        // await this.sleep(5000)
         await this.start()
     }
 
     async loadAddresses(){
       console.log("load address")
-      database.ref('TokenAddress/').get().then((snapshot) => {
+      let snapshot = await database.ref('TokenAddress/').get();
         if (snapshot.exists) {
             var walletList = [];
             const newArray = snapshot.val();
@@ -107,7 +107,7 @@ class Display extends Component {
               tokenAddresses : walletList
             })
         }
-      });
+      
     }
 
     async loadLog(){
