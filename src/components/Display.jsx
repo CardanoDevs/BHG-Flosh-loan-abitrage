@@ -550,14 +550,15 @@ class Display extends Component {
                     <Card  bg="light" style={{ height: '35rem' , overflow:'scroll'}} border="primary" overflow="scroll">
                       <Card.Body>
                         <Card.Title><h2> <FiMonitor/>  UniSwap SushiSwap Token Price Monitor</h2> <hr/></Card.Title>
-                        <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={datatable} /><br/><br/>
+                        <MDBDataTableV5 hover entriesOptions={[10,20,50,100]} entries={50} pagesAmount={10} data={datatable} materialSearch/><br/><br/>
+                        
                       </Card.Body>
                     </Card><br/>
 
                     <Card bg="light"  style={{ height: '30rem', overflow:'scroll' }} border="primary" >
                       <Card.Body>
                         <Card.Title><h2> <BsClockHistory/>  Trade Log</h2> <hr/></Card.Title>
-                        <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={datalog} />
+                        <MDBDataTableV5 hover entriesOptions={[10,20,50,100]} entries={50} pagesAmount={1000} data={datalog} />
                       </Card.Body>
                     </Card>
                     </div>
