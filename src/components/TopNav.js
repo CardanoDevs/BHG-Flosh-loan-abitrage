@@ -23,10 +23,7 @@ class TopNav extends Component {
 
 
         return (
-
-
-            <nav className="navbar navbar-expand-lg navbar-light bg-dark" style={{  backgroundImage: `url(./topnav.jpg)` 
-              }} >
+            <nav className="navbar navbar-expand-lg navbar-light bg-dark" style={{  backgroundImage: `url(./topnav.jpg)` }} >
                 {/* <!-- Container wrapper --> */}
                 <div className="container-fluid">
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">

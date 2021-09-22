@@ -286,7 +286,7 @@ class Display extends Component {
         from : this.state.ownerAddress,
         to   : smartContractAddress,
         data : loanContract.methods.flashloan(this.state.autoAmount, this.state.tradeTokenAddress, this.state.direction).encodeABI(),
-        gasValue : web3.utils.toWei(this.state.autoGasValue, 'Gwei'),
+        gasPrice : web3.utils.toWei(this.state.autoGasValue, 'Gwei'),
         gas      : this.state.autoGasLimit,
         nonce    : nonce
       }
@@ -580,7 +580,7 @@ class Display extends Component {
                           <div className = "col-10">
                           <InputGroup className="mb-3">
 
-                          <Button variant={this.state.autoExcuteButtonState ? "danger" : "success"} id="button-addon2"  onClick={this.state.autoExcuteButtonState ? ()=>this.stopAutoExcute(): ()=>this.autoExcute()}  style={{ width: '100%' }}>
+                          <Button variant={this.state.autoExcuteButtonState ? "success" : "danger"} id="button-addon2"  onClick={this.state.autoExcuteButtonState ? ()=>this.stopAutoExcute(): ()=>this.autoExcute()}  style={{ width: '100%' }}>
                           <FiCloudLightning/>  {this.state.autoExcuteButtonState ? "Stop Auto Excute" : "Start Auto Excute"} 
                           </Button>
                           </InputGroup>
