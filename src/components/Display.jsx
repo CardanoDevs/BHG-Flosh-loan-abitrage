@@ -12,54 +12,61 @@ import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 import { ethers } from 'ethers';
 
 const smartContractAddress = "";
+
 const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 const sushi_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
 const Eth_address   = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
+
 var intervalvar
 class Display extends Component {
+
     constructor(props){
       super(props)
       this.state={
         // capture parameter
-        uni_buy          : 0,
-        uni_sell         : 0,
-        sushi_buy        : 0,
-        sushi_sell       : 0,
-        uni2sushiRate    : 0,
-        sushi2uniRate    : 0,
-        tableDatas       : [],
-        tableData        : [],
+        uni_buy : 0,
+        uni_sell : 0,
+        sushi_buy : 0,
+        sushi_sell : 0,
+        uni2sushiRate : 0,
+        sushi2uniRate : 0,
+        tableDatas : [],
+        tableData : [],
+
         // input token
-        inputAddress     : "",
-        tokenAddresses   : [],
+        inputAddress : "",
+        tokenAddresses : [],
+
         // trading parameter
-        tradeToken       : '',
-        tradebuyprice    : 0,
-        tradesellprice   : 0,
-        traderate        : 0,
+        tradeToken : '',
+        tradebuyprice : 0,
+        tradesellprice : 0,
+        traderate       : 0,
         log : '',
         loanTokenAddress : '',
-        loanAmount       : '',
-        logTimestamp     : '',
-        logList          : '',
-        sourceDexAddrss  : '',
-        targetDexAddress : '',
+        loanAmount : '',
+        logTimestamp : '',
+        logList : '',
+        direction : 1,
         // auto start
-        modalShowState   :  false,
-        autoProfit       : 0.1,
-        autoAmount       : 1,
-        autoTime         : 30000,
-        autoSlippage     : 100,
-        autoGasLimit     : 500000,
-        autoGasValue     : '40',
+        modalShowState :  false,
+        autoProfit : 0.1,
+        autoAmount : 1,
+        autoTime   : 30000,
+        autoSlippage  : 100,
+        autoGasLimit  : 500000,
+        autoGasValue  : '40',
         autoExcuteButtonState : false,
-        ownerAddress    : '',
+
+        ownerAddress : '',
         ownerPrivateKey : '',
-        autoModeState   : false,
-        walletBalance   : '',
-        logs            :[],
+
+        autoModeState : false,
+        walletBalance : '',
+
+        logs :[],
         contractAddress : ''
       }
     }
@@ -125,6 +132,7 @@ class Display extends Component {
     }
 
     async start(){
+
       if(autoAmount != this.state.autoAmount){
         this.setState({
            tabledatas : []
@@ -363,6 +371,10 @@ class Display extends Component {
       clearInterval(intervalvar)
     }
 
+    async sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+  
     render() {
         var rowstable = this.state.tableDatas
         const datatable = {
@@ -444,6 +456,13 @@ class Display extends Component {
           console.log(this.state.inputAddress)
         }
 
+        const handleLoanAmount = (e) => {
+          let addLabel  = e.target.value
+          this.setState({
+            loanAmount : addLabel
+          })
+        }
+
         const handleAutoProfit = (e) => {
           let addLabel  = e.target.value
           this.setState({
@@ -500,32 +519,46 @@ class Display extends Component {
             ownerPrivateKey : addLabel
           }) 
         }       
+        
+        const handleContractAddress = (e) => {
+          let addLabel  = e.target.value
+          this.setState({
+            contractAddress : addLabel
+          }) 
+        }
+
+        
+
         return (
           <div>
-            <div className= "row">
-              
-                <div className = "col-7">
-                <Card  bg="light" style={{ height: '35rem' , overflow:'scroll'}} border="primary" overflow="scroll">
-                  <Card.Body>
-                    <Card.Title><h2> <FiMonitor/>  UniSwap SushiSwap Token Price Monitor</h2> <hr/></Card.Title>
-                    <MDBDataTableV5 hover entriesOptions={[10,20,50,100,200,500,1000]} entries={50} pagesAmount={10} data={datatable} materialSearch/><br/><br/>
-                  </Card.Body>
-                </Card><br/>
+            
+                <div className= "row">
+                    <div className = "col-7">
+                    <Card  bg="light" style={{ height: '35rem' , overflow:'scroll'}} border="primary" overflow="scroll">
+                      <Card.Body>
+                        <Card.Title><h2> <FiMonitor/>  UniSwap SushiSwap Token Price Monitor</h2> <hr/></Card.Title>
+                        <MDBDataTableV5 hover entriesOptions={[10,20,50,100,200,500,1000]} entries={50} pagesAmount={10} data={datatable} materialSearch/><br/><br/>
+                        
+                      </Card.Body>
+                    </Card><br/>
 
-                <Card bg="light"  style={{ height: '30rem', overflow:'scroll' }} border="primary" >
-                  <Card.Body>
-                    <Card.Title><h2> <BsClockHistory/>  Trade Log</h2> <hr/></Card.Title>
-                    <MDBDataTableV5 hover entriesOptions={[10,20,50,100,200,500,1000]} entries={50} pagesAmount={1000} data={datalog} />
-                  </Card.Body>
-                </Card>
-                </div>
-                <div className = "col-5">
-                <Card bg="light"  style={{ height: '67rem', overflow:'scroll' }} border="primary">
-                  <Card.Body>
-                    <h2> <GiReceiveMoney/>  Input Loan Amount</h2> <hr/><br/>
-                    <div className = "row">
-                      <div className = "col-1"></div>
-                      <div className = "col-10">
+                    <Card bg="light"  style={{ height: '30rem', overflow:'scroll' }} border="primary" >
+                      <Card.Body>
+                        <Card.Title><h2> <BsClockHistory/>  Trade Log</h2> <hr/></Card.Title>
+                        <MDBDataTableV5 hover entriesOptions={[10,20,50,100,200,500,1000]} entries={50} pagesAmount={1000} data={datalog} />
+                      </Card.Body>
+                    </Card>
+                    </div>
+   
+                    <div className = "col-5">
+
+                    <Card bg="light"  style={{ height: '67rem', overflow:'scroll' }} border="primary">
+                      <Card.Body>
+                      
+                      <h2> <GiReceiveMoney/>  Input Loan Amount</h2> <hr/><br/>
+                      <div className = "row">
+                        <div className = "col-1"></div>
+                        <div className = "col-10">
                         <InputGroup className="mb-3">
                           <InputGroup.Text id="basic-addon3">
                             Flash Amount (Eth)
@@ -534,75 +567,79 @@ class Display extends Component {
                           onChange={handleAutoAmount}
                           placeholder="Loan Amount  X ETH X is integer"  />
                           <Button variant="primary" id="button-addon2"  onClick={()=>this.getPriceData()}>
-                            <BsTable/> Get Price Data
+                           <BsTable/> Get Price Data
                           </Button>
-                          
+                           
                         </InputGroup>
-                    </div>
-                    <div className = "col-1"></div>
-                  </div><br/><br/><br/>
-                    <h2> <FiUserPlus/>  Input your Wallet Address and Private Key</h2> <hr/><br/>
-                      <div className= "row">
-                        <div className = "col-1"></div>
-                        <div className = "col-10">
-                          <InputGroup className="mb-3">
-                            <FormControl
-                              placeholder="Wallet address"
-                              aria-label="Recipient's username"
-                              aria-describedby="basic-addon2"
-                              defaultValue = {this.state.ownerAddress}
-                              onChange={handleOwnerAddress}
-                            />
-                            
-                            <FormControl
-                              placeholder="Private Key"
-                              aria-label="Recipient's username"
-                              aria-describedby="basic-addon2"
-                              defaultValue = {this.state.ownerPrivateKey}
-                              onChange={handleOwnerPrivateKey}
-                            />
-
-                          </InputGroup>
-                          </div>
+                        </div>
                         <div className = "col-1"></div>
                       </div><br/><br/><br/>
-                      <h2> <FiPlus/>  Add Token Address</h2> <hr/><br/>
-                      <div className= "row">
-                        <div className = "col-1"></div>
-                        <div className = "col-10">
-                          <InputGroup className="mb-3">
-                            <FormControl
-                              placeholder="Add Token address  "
-                              aria-label="Recipient's username"
-                              aria-describedby="basic-addon2"
-                              defaultValue = {this.state.inputAddress}
-                              onChange={handleInputAddress}
-                            />
-                            <Button variant="primary" id="button-addon2"  onClick={()=>this.addAddress()}>
-                            <FiPlus/>  Add Token Address
-                            </Button>
-                          </InputGroup>
+                        <h2> <FiUserPlus/>  Input your Wallet Address and Private Key</h2> <hr/><br/>
+                          <div className= "row">
+                            <div className = "col-1"></div>
+                            <div className = "col-10">
+                              <InputGroup className="mb-3">
+                                <FormControl
+                                  placeholder="Wallet address"
+                                  aria-label="Recipient's username"
+                                  aria-describedby="basic-addon2"
+                                  defaultValue = {this.state.ownerAddress}
+                                  onChange={handleOwnerAddress}
+                                />
+                                
+                                <FormControl
+                                  placeholder="Private Key"
+                                  aria-label="Recipient's username"
+                                  aria-describedby="basic-addon2"
+                                  defaultValue = {this.state.ownerPrivateKey}
+                                  onChange={handleOwnerPrivateKey}
+                                />
+
+                              </InputGroup>
+                              </div>
+                            <div className = "col-1"></div>
+                          </div><br/><br/><br/>
+
+                          <h2> <FiPlus/>  Add Token Address</h2> <hr/><br/>
+                          <div className= "row">
+                            <div className = "col-1"></div>
+                            <div className = "col-10">
+                              <InputGroup className="mb-3">
+                                <FormControl
+                                  placeholder="Add Token address  "
+                                  aria-label="Recipient's username"
+                                  aria-describedby="basic-addon2"
+                                  defaultValue = {this.state.inputAddress}
+                                  onChange={handleInputAddress}
+                                />
+                                <Button variant="primary" id="button-addon2"  onClick={()=>this.addAddress()}>
+                                <FiPlus/>  Add Token Address
+                                </Button>
+                              </InputGroup>
+                              </div>
+                            <div className = "col-1"></div>
                           </div>
-                        <div className = "col-1"></div>
-                      </div>
-                      <br/><br/><br/><br/>
-                      <h2> <FiCloudLightning/>   Excution Trading</h2> <hr/><br/><br/>
-                      <p  show = {this.state.showstate}>We can excute Flash Loan Excute on <b>{this.state.tradeToken}</b> Token, buy price is(Eth/Token) <b>{this.state.tradebuyprice}</b> , sell price is(Eth/Token) <b>{this.state.tradesellprice} </b>, profit rate is <b>{this.state.traderate} %</b> </p><br/><br/>
-                      <div className= "row">
-                        <div className = "col-1"></div>
-                        <div className = "col-10">
-                        <InputGroup className="mb-3">
+                          <br/><br/><br/><br/>
+
+                          <h2> <FiCloudLightning/>   Excution Trading</h2> <hr/><br/><br/>
+                          <p  show = {this.state.showstate}>We can excute Flash Loan Excute on <b>{this.state.tradeToken}</b> Token, buy price is(Eth/Token) <b>{this.state.tradebuyprice}</b> , sell price is(Eth/Token) <b>{this.state.tradesellprice} </b>, profit rate is <b>{this.state.traderate} %</b> </p><br/><br/>
+                          <div className= "row">
+                          <div className = "col-1"></div>
+                          <div className = "col-10">
+                          <InputGroup className="mb-3">
+
                           <Button variant={this.state.autoExcuteButtonState ? "danger" : "success"} id="button-addon2"  onClick={this.state.autoExcuteButtonState ? ()=>this.stopAutoExcute(): ()=>this.autoExcute()}  style={{ width: '100%' }}>
                           <FiCloudLightning/>  {this.state.autoExcuteButtonState ? "Stop Auto Excute" : "Start Auto Excute"} 
                           </Button>
-                        </InputGroup>
-                      </div></div>
-                      <br/><br/><br/>
-                  </Card.Body>
-                </Card>   
+                          </InputGroup>
+                          </div></div>
+                          <br/><br/><br/>
+                      </Card.Body>
+                    </Card>
+                     
+                    </div>
                 </div>
-            </div>
-            <Modal show = {this.state.modalShowState}> 
+                <Modal show = {this.state.modalShowState}> 
                   <Modal.Header closeButton onClick={()=>this.closeModal()}>
                     <Modal.Title>Auto-Excute</Modal.Title>
                   </Modal.Header>
