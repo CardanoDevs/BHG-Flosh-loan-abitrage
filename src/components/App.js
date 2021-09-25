@@ -4,9 +4,6 @@ import Display from './Display.jsx';
 import './App.css'
 import Web3 from 'web3';
 
-
-
-
 class App extends Component {
     
     async componentWillMount() {

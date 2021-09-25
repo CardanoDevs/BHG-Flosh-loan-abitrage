@@ -11,7 +11,7 @@ import { GiReceiveMoney } from "react-icons/gi"
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 import { ethers } from 'ethers';
 
-const smartContractAddress = '0xC5e96aC133a3314c6a822A9556f2Faa0a938425c'
+const smartContractAddress = '0x94738d73EaF288aB195cBc8F1D93176e8B1A72Eb'
 const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 const sushi_address   = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
