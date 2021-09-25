@@ -1,12 +1,6 @@
 import React, {Component} from 'react';
 import { Navbar,} from 'react-bootstrap';
 import { MDBIcon} from 'mdbreact';
-import Web3 from 'web3';
-
-
-
-
-
 class TopNav extends Component {
     constructor(props) {
         super(props)
@@ -14,17 +8,8 @@ class TopNav extends Component {
             connectedAddress : ''
         }
     }
-
-
-
     render () {
-
-
-
-
         return (
-
-
             <nav className="navbar navbar-expand-lg navbar-light bg-dark" style={{  backgroundImage: `url(./topnav.jpg)` 
               }} >
                 {/* <!-- Container wrapper --> */}
@@ -36,7 +21,7 @@ class TopNav extends Component {
                     </div>
                   
                 </div>
-                </nav>
+            </nav>
         );
     }
 }
