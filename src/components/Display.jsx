@@ -11,17 +11,14 @@ import { GiReceiveMoney } from "react-icons/gi"
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
 import { ethers } from 'ethers';
 
-const smartContractAddress = "";
-
-const web3    = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
-const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-const sushi_address = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
-const Eth_address   = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
-
+const smartContractAddress = "0xfD07081eA2AfBd133E8394d6e86cd26487625062";
+const web3                 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
+const uniswap_address      = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
+const sushi_address        = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
+const Eth_address          = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
 var intervalvar
 class Display extends Component {
-
     constructor(props){
       super(props)
       this.state={
@@ -34,11 +31,9 @@ class Display extends Component {
         sushi2uniRate : 0,
         tableDatas : [],
         tableData : [],
-
         // input token
         inputAddress : "",
         tokenAddresses : [],
-
         // trading parameter
         tradeToken : '',
         tradebuyprice : 0,
@@ -59,13 +54,10 @@ class Display extends Component {
         autoGasLimit  : 500000,
         autoGasValue  : '40',
         autoExcuteButtonState : false,
-
         ownerAddress : '',
         ownerPrivateKey : '',
-
         autoModeState : false,
         walletBalance : '',
-
         logs :[],
         contractAddress : ''
       }
@@ -91,7 +83,6 @@ class Display extends Component {
             if (newArray) {
                 Object.keys(newArray).map((key) => {
                     const value = newArray[key];
-
                     walletList.push({
                             Address : web3.utils.toChecksumAddress(value.Address),
                     })
@@ -101,7 +92,6 @@ class Display extends Component {
               tokenAddresses : walletList
             })
         }
-      
     }
 
     async loadLog(){
@@ -132,18 +122,14 @@ class Display extends Component {
     }
 
     async start(){
-
       if(autoAmount != this.state.autoAmount){
         this.setState({
            tabledatas : []
         })
       }
 
-
       let autoAmount =  this.state.autoAmount;
-
       console.log("loan amount " , this.state.autoAmount)
-
       for (let index = 0; index < this.state.tokenAddresses.length; index++) {
         console.log(index)
       try{
@@ -165,7 +151,6 @@ class Display extends Component {
         uni_sell         = Math.round( uni_sell[0]    / Math.pow(10, tokenDecimal - 5 )) / 100000
         sushi_sell       = Math.round( sushi_sell[0]  / Math.pow(10, tokenDecimal - 5 )) / 100000
         
-      
         let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 100000/sushi_sell)  /1000
         let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 100000/uni_sell)    /1000
         let uni2sushiRateStyle 
@@ -456,13 +441,6 @@ class Display extends Component {
           console.log(this.state.inputAddress)
         }
 
-        const handleLoanAmount = (e) => {
-          let addLabel  = e.target.value
-          this.setState({
-            loanAmount : addLabel
-          })
-        }
-
         const handleAutoProfit = (e) => {
           let addLabel  = e.target.value
           this.setState({
@@ -519,16 +497,7 @@ class Display extends Component {
             ownerPrivateKey : addLabel
           }) 
         }       
-        
-        const handleContractAddress = (e) => {
-          let addLabel  = e.target.value
-          this.setState({
-            contractAddress : addLabel
-          }) 
-        }
-
-        
-
+      
         return (
           <div>
             
