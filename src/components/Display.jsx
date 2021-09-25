@@ -6,21 +6,22 @@ import { erc20abi , abi } from './abi';
 import { MDBDataTableV5 } from 'mdbreact';
 import { database,  } from './firebase/firebase';
 import { FiMonitor , FiPlus , FiCloudLightning , FiUserPlus   } from "react-icons/fi";
-import { BsClockHistory } from "react-icons/bs"
+import { BsClockHistory, BsTable } from "react-icons/bs"
+import { GiReceiveMoney } from "react-icons/gi"
 import LoanContract from '../contracts/artifacts/FlashloanV1.json';
+import { ethers } from 'ethers';
 
 const smartContractAddress = '0xC5e96aC133a3314c6a822A9556f2Faa0a938425c'
 const web3    = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"));
 const uniswap_address = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-const sushi_address = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
-const Eth_address   = '0xd0A1E359811322d97991E03f863a0C30C2cF029C'
+const sushi_address   = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
+const Eth_address     = '0xd0A1E359811322d97991E03f863a0C30C2cF029C'
 
 var intervalvar
 class Display extends Component {
     constructor(props){
       super(props)
       this.state={
-
         // capture parameter
         uni_buy : 0,
         uni_sell : 0,
@@ -30,11 +31,9 @@ class Display extends Component {
         sushi2uniRate : 0,
         tableDatas : [],
         tableData : [],
-
         // input token
         inputAddress : "",
         tokenAddresses : [],
-
         // trading parameter
         tradeToken : '',
         tradebuyprice : 0,
@@ -52,16 +51,13 @@ class Display extends Component {
         autoAmount : 1,
         autoTime   : 30000,
         autoSlippage  : 100,
-        autoGasLimit  : 1000000,
+        autoGasLimit  : 500000,
         autoGasValue  : '40',
         autoExcuteButtonState : false,
-
         ownerAddress : '',
         ownerPrivateKey : '',
-
         autoModeState : false,
         walletBalance : '',
-
         logs :[],
         contractAddress : ''
       }
@@ -70,12 +66,17 @@ class Display extends Component {
     async componentWillMount() {
         await this.loadLog()
         await this.loadAddresses()
-        await this.sleep(3000)
+    }
+
+    async getPriceData() {
+        await this.loadLog()
+        await this.loadAddresses()
         await this.start()
     }
 
     async loadAddresses(){
-      database.ref('KovanTokenAddress/').get().then((snapshot) => {
+      console.log("load address")
+      let snapshot = await database.ref('KovanTokenAddress/').get();
         if (snapshot.exists) {
             var walletList = [];
             const newArray = snapshot.val();
@@ -90,12 +91,11 @@ class Display extends Component {
             this.setState({
               tokenAddresses : walletList
             })
-          }
-      });
+        }
     }
 
     async loadLog(){
-      console.log("loadlog")
+      console.log("start load log")
       database.ref('testlog/').get().then((snapshot) => {
           if (snapshot.exists) {
             var logs = [];
@@ -121,49 +121,38 @@ class Display extends Component {
       });
     }
 
-    async start (){
-      console.log("update table")
-      for(let index = 0; index < this.state.tokenAddresses.length; index++) {
+    async start(){
+      if(autoAmount != this.state.autoAmount){
+        this.setState({
+           tabledatas : []
+        })
+      }
+
+      let autoAmount =  this.state.autoAmount;
+      console.log("loan amount " , this.state.autoAmount)
+      for (let index = 0; index < this.state.tokenAddresses.length; index++) {
         console.log(index)
       try{
         let tokenContract= new web3.eth.Contract(erc20abi,this.state.tokenAddresses[index]["Address"]);
         let tokenName    = await tokenContract.methods.symbol().call().then(function(res) {  return res;  })
         let tokenDecimal = await tokenContract.methods.decimals().call()
         let uni_buy , uni_sell,sushi_buy, sushi_sell
-        if(tokenDecimal > 15 || tokenDecimal == 15 ){
-          let mycontract1  = new web3.eth.Contract(abi, uniswap_address)
-          uni_buy      = await mycontract1.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
-          uni_sell     = await mycontract1.methods.getAmountsOut(Math.pow(10, 15), [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
-          let mycontract2  = new web3.eth.Contract(abi, sushi_address)
-          sushi_buy      = await mycontract2.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
-          sushi_sell     = await mycontract2.methods.getAmountsOut(Math.pow(10, 15) ,[this.state.tokenAddresses[index]["Address"],Eth_address]).call();
+ 
+        let mycontract1  = new web3.eth.Contract(abi, uniswap_address)
+        uni_buy       = await mycontract1.methods.getAmountsOut( ethers.BigNumber.from((Math.pow(10, 18) * autoAmount) + ''), [Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
+        uni_sell      = await mycontract1.methods.getAmountsIn ( ethers.BigNumber.from((Math.pow(10, 18) * autoAmount) + ''), [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
+        
+        let mycontract2  = new web3.eth.Contract(abi, sushi_address)
+        sushi_buy      = await mycontract2.methods.getAmountsOut( ethers.BigNumber.from((Math.pow(10, 18) * autoAmount) + '') ,[Eth_address, this.state.tokenAddresses[index]["Address"]]).call();
+        sushi_sell     = await mycontract2.methods.getAmountsIn ( ethers.BigNumber.from((Math.pow(10, 18) * autoAmount) + '') ,[this.state.tokenAddresses[index]["Address"],Eth_address]).call();
 
-          uni_buy          = Math.round(uni_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
-          sushi_buy        = Math.round(sushi_buy[1] / Math.pow(10, tokenDecimal - 6 )) / 1000
-          uni_sell         = Math.round( Math.pow(10, 36 - tokenDecimal) / uni_sell[1] ) /1000
-          sushi_sell       = Math.round( Math.pow(10, 36 - tokenDecimal)  / sushi_sell[1] ) /1000
-        }
-        else if (tokenDecimal < 15 ){
-          let mycontract1  = new web3.eth.Contract(abi, uniswap_address)
-          uni_buy      = await mycontract1.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
-          uni_sell     = await mycontract1.methods.getAmountsOut(Math.pow(10, tokenDecimal), [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
-          let mycontract2  = new web3.eth.Contract(abi, sushi_address)
-          sushi_buy      = await mycontract2.methods.getAmountsOut(Math.pow(10, 15),[Eth_address,this.state.tokenAddresses[index]["Address"]]).call();
-          sushi_sell     = await mycontract2.methods.getAmountsOut(Math.pow(10, tokenDecimal) , [this.state.tokenAddresses[index]["Address"],Eth_address]).call();
-
-          uni_buy          = Math.round(uni_buy[1]   / Math.pow(10, tokenDecimal - 6)) / 1000
-          sushi_buy        = Math.round(sushi_buy[1] / Math.pow(10, tokenDecimal - 6)) / 1000
-          uni_sell         = Math.round( Math.pow(10, 21)  /   uni_sell[1]  ) /1000
-          sushi_sell       = Math.round( Math.pow(10, 21)  / sushi_sell[1] ) /1000
-        }
-        let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 10000/sushi_sell)  /100 
-        let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 10000/uni_sell)    /100
-        if(uni_sell == 0){
-          sushi2uniRate = 0
-        }
-        if(sushi_sell == 0){
-          uni2sushiRate = 0
-        }
+        uni_buy          = Math.round( uni_buy[1]     / Math.pow(10, tokenDecimal - 5 )) / 100000
+        sushi_buy        = Math.round( sushi_buy[1]   / Math.pow(10, tokenDecimal - 5 )) / 100000
+        uni_sell         = Math.round( uni_sell[0]    / Math.pow(10, tokenDecimal - 5 )) / 100000
+        sushi_sell       = Math.round( sushi_sell[0]  / Math.pow(10, tokenDecimal - 5 )) / 100000
+        
+        let uni2sushiRate = Math.round((uni_buy-sushi_sell) * 100000/sushi_sell)  /1000
+        let sushi2uniRate = Math.round((sushi_buy-uni_sell) * 100000/uni_sell)    /1000
         let uni2sushiRateStyle 
         let sushi2uniRateStyle
 
@@ -180,13 +169,9 @@ class Display extends Component {
             })
            }
         }
-
-
         else if (uni2sushiRate < 0){
            uni2sushiRateStyle     = <a className='text-danger'> {uni2sushiRate} </a>
         }
-
-
         if (sushi2uniRate >= 0){
            sushi2uniRateStyle     = <a className='text-success'> {sushi2uniRate} </a>
            if(sushi2uniRate > this.state.traderate){
@@ -200,12 +185,9 @@ class Display extends Component {
             })
            }
         }
-
-
         else if (sushi2uniRate < 0){
            sushi2uniRateStyle     = <a className='text-danger'> {sushi2uniRate} </a>
         }
-
         if (this.state.tradeToken == tokenName){
           if (this.state.direction == 1){
             this.setState({
@@ -219,6 +201,7 @@ class Display extends Component {
           }
         }
 
+
         let tableData = {
           tokenName     : tokenName,
           tokenDecimal  : tokenDecimal,
@@ -231,6 +214,8 @@ class Display extends Component {
           uni2sushiRateStyle : uni2sushiRateStyle,
           sushi2uniRateStyle : sushi2uniRateStyle
         }
+
+
         let tableDatas = this.state.tableDatas
         tableDatas[index] = tableData
         this.setState({
@@ -238,8 +223,14 @@ class Display extends Component {
         })
 
         }catch(err){
+           let tableDatas = this.state.tableDatas
+            tableDatas[index] = []
+            this.setState({
+              tableDatas : tableDatas
+            })
           console.log(err)
           index  =  index
+          
         }
         if (index ==  this.state.tokenAddresses.length - 1){
           this.start()
@@ -254,12 +245,14 @@ class Display extends Component {
       }
       for (let index = 0; index < this.state.tokenAddresses.length; index++) {
         if(this.state.tokenAddresses[index]["Address"] == web3.utils.toChecksumAddress(this.state.inputAddress)){
+          
           let buffer = ''
           this.setState({inputAddress : buffer})
           alert("Aleady exist")
           return
         } 
       }
+
       const tokenAddressList= {
         Address   : web3.utils.toChecksumAddress(this.state.inputAddress),
       }
@@ -277,8 +270,10 @@ class Display extends Component {
         console.log("faild profit")
         return
       }
-      const privateWeb3    = window.web3;
-      let loanContract  = await web3.eth.Contract(LoanContract.abi, smartContractAddress)
+      console.log("send transaction")
+
+      let loanContract  = await web3.eth.Contract(LoanContract.abi, smartContractAddress);
+
       let nonce = await web3.eth.getTransactionCount(this.state.ownerAddress)
       console.log(nonce,this.state.ownerAddress, this.state.autoAmount, this.state.tradeToken , this.state.direction)
       console.log(this.state.autoGasLimit, this.state.autoGasValue)
@@ -292,7 +287,7 @@ class Display extends Component {
       }
         const promise = await web3.eth.accounts.signTransaction(tx, this.state.ownerPrivateKey)
         await web3.eth.sendSignedTransaction(promise.rawTransaction).once('confirmation', () => {
-          console.log("successful")          
+          console.log('successful')
           const logList= {
             timeStamp  : new Date().toISOString(),
             loanAmount : this.state.autoAmount,
@@ -305,7 +300,7 @@ class Display extends Component {
           newUserRef.set(logList);
           let buffer = ''
           this.setState({logList : buffer})
-          this.loadLog()
+          this.loadlog()
         })
         .once('error', (e) => {
             console.log(e)
@@ -330,10 +325,10 @@ class Display extends Component {
       this.manualExcute()
       intervalvar  = setInterval(
         () => this.manualExcute(),
-        this.state.autoTime 
+        this.state.autoTime
       );
     }
-
+    
     closeModal(){
       this.setState({
         modalShowState : false,
@@ -341,7 +336,7 @@ class Display extends Component {
         autoAmount : 1,
         autoTime   : 30000,
         autoSlippage  : 100,
-        autoGasLimit  : 1000000,
+        autoGasLimit  : 500000,
         autoGasValue  : 40,
       })
     }
@@ -353,18 +348,18 @@ class Display extends Component {
         autoAmount    : 1,
         autoTime      : 30000,
         autoSlippage  : 100,
-        autoGasLimit  : 1000000,
+        autoGasLimit  : 500000,
         autoGasValue  : 40,
         autoModeState : false,
       })
       console.log("stop excute")
       clearInterval(intervalvar)
     }
-  
-    sleep(ms) {
+
+    async sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
     }
-    
+  
     render() {
         var rowstable = this.state.tableDatas
         const datatable = {
@@ -374,11 +369,11 @@ class Display extends Component {
                 field : 'tokenName',
             },
             {
-                label : 'Uni buy Eth/Token',
+                label : 'Uni Buy Amount',
                 field : 'uni_buy',
             },
             {
-                label : 'sushi sell Eth/Token',
+                label : 'Sushi Sell Amount',
                 field : 'sushi_sell',
             },
             {
@@ -386,11 +381,11 @@ class Display extends Component {
                 field : 'uni2sushiRateStyle',
             },
             {
-                label : 'sushi buy Eth/Token',
+                label : 'Sushi Buy Amount',
                 field : 'sushi_buy',
             },
             {
-                label : 'uni sell Eth/Token',
+                label : 'Uni Sell Amount',
                 field : 'uni_sell',
             },
             {
@@ -502,6 +497,7 @@ class Display extends Component {
             ownerPrivateKey : addLabel
           }) 
         }       
+      
         return (
           <div>
             
@@ -510,14 +506,15 @@ class Display extends Component {
                     <Card  bg="light" style={{ height: '35rem' , overflow:'scroll'}} border="primary" overflow="scroll">
                       <Card.Body>
                         <Card.Title><h2> <FiMonitor/>  UniSwap SushiSwap Token Price Monitor</h2> <hr/></Card.Title>
-                        <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={datatable} /><br/><br/>
+                        <MDBDataTableV5 hover entriesOptions={[10,20,50,100,200,500,1000]} entries={50} pagesAmount={10} data={datatable} materialSearch/><br/><br/>
+                        
                       </Card.Body>
                     </Card><br/>
 
                     <Card bg="light"  style={{ height: '30rem', overflow:'scroll' }} border="primary" >
                       <Card.Body>
                         <Card.Title><h2> <BsClockHistory/>  Trade Log</h2> <hr/></Card.Title>
-                        <MDBDataTableV5 hover entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} data={datalog} />
+                        <MDBDataTableV5 hover entriesOptions={[10,20,50,100,200,500,1000]} entries={50} pagesAmount={1000} data={datalog} />
                       </Card.Body>
                     </Card>
                     </div>
@@ -526,6 +523,26 @@ class Display extends Component {
 
                     <Card bg="light"  style={{ height: '67rem', overflow:'scroll' }} border="primary">
                       <Card.Body>
+                      
+                      <h2> <GiReceiveMoney/>  Input Loan Amount</h2> <hr/><br/>
+                      <div className = "row">
+                        <div className = "col-1"></div>
+                        <div className = "col-10">
+                        <InputGroup className="mb-3">
+                          <InputGroup.Text id="basic-addon3">
+                            Flash Amount (Eth)
+                          </InputGroup.Text>
+                          <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoAmount} 
+                          onChange={handleAutoAmount}
+                          placeholder="Loan Amount  X ETH X is integer"  />
+                          <Button variant="primary" id="button-addon2"  onClick={()=>this.getPriceData()}>
+                           <BsTable/> Get Price Data
+                          </Button>
+                           
+                        </InputGroup>
+                        </div>
+                        <div className = "col-1"></div>
+                      </div><br/><br/><br/>
                         <h2> <FiUserPlus/>  Input your Wallet Address and Private Key</h2> <hr/><br/>
                           <div className= "row">
                             <div className = "col-1"></div>
@@ -550,7 +567,7 @@ class Display extends Component {
                               </InputGroup>
                               </div>
                             <div className = "col-1"></div>
-                          </div><br/><br/><br/><br/>
+                          </div><br/><br/><br/>
 
                           <h2> <FiPlus/>  Add Token Address</h2> <hr/><br/>
                           <div className= "row">
@@ -580,7 +597,7 @@ class Display extends Component {
                           <div className = "col-10">
                           <InputGroup className="mb-3">
 
-                          <Button variant={this.state.autoExcuteButtonState ? "success" : "danger"} id="button-addon2"  onClick={this.state.autoExcuteButtonState ? ()=>this.stopAutoExcute(): ()=>this.autoExcute()}  style={{ width: '100%' }}>
+                          <Button variant={this.state.autoExcuteButtonState ? "danger" : "success"} id="button-addon2"  onClick={this.state.autoExcuteButtonState ? ()=>this.stopAutoExcute(): ()=>this.autoExcute()}  style={{ width: '100%' }}>
                           <FiCloudLightning/>  {this.state.autoExcuteButtonState ? "Stop Auto Excute" : "Start Auto Excute"} 
                           </Button>
                           </InputGroup>
@@ -591,7 +608,7 @@ class Display extends Component {
                      
                     </div>
                 </div>
-            <Modal show = {this.state.modalShowState}> 
+                <Modal show = {this.state.modalShowState}> 
                   <Modal.Header closeButton onClick={()=>this.closeModal()}>
                     <Modal.Title>Auto-Excute</Modal.Title>
                   </Modal.Header>
@@ -602,23 +619,18 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url1" aria-describedby="basic-addon3"  type="text"  defaultValue = {this.state.autoProfit} 
                     onChange={handleAutoProfit}
-                    placeholder="profit limit : %"/>
+                    placeholder="Profit Limit, unit : %"/>
+                    <InputGroup.Text id="basic-addon2">%</InputGroup.Text>
                   </InputGroup>
-                  <InputGroup className="mb-3">
-                    <InputGroup.Text id="basic-addon3">
-                      Flash Amount 
-                    </InputGroup.Text>
-                    <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoAmount} 
-                    onChange={handleAutoAmount}
-                    placeholder="flash amount : X ETH X is integer"  />
-                  </InputGroup>
+                  
                   <InputGroup className="mb-3">
                     <InputGroup.Text id="basic-addon3">
                       Interval 
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoTime} 
                     onChange={handleAutoTimepitch}
-                    placeholder="Interval time unit : ms"  />
+                    placeholder="Interval  Unit : ms"  />
+                    <InputGroup.Text id="basic-addon2">ms</InputGroup.Text>
                   </InputGroup>
 
                   <InputGroup className="mb-3">
@@ -627,7 +639,8 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoSlippage} 
                     onChange={handleAutoSlippage}
-                    placeholder="SLippage  unit : %"  />
+                    placeholder="Slippage Unit : %"  />
+                    <InputGroup.Text id="basic-addon2">%</InputGroup.Text>
                   </InputGroup>
 
                   <InputGroup className="mb-3">
@@ -636,16 +649,19 @@ class Display extends Component {
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoGasValue} 
                     onChange={handleAutoGasValue}
-                    placeholder="gas value  unit : gwei"  />
+                    placeholder="Gas Value Unit : gwei"  />
+                    <InputGroup.Text id="basic-addon2">Gwei</InputGroup.Text>
                   </InputGroup>
+
                   <InputGroup className="mb-3">
                     <InputGroup.Text id="basic-addon3">
                       Gas Limit 
                     </InputGroup.Text>
                     <FormControl id="basic-url" aria-describedby="basic-addon3" type="text"   defaultValue = {this.state.autoGasLimit} 
                     onChange={handleAutoGasLimit}
-                    placeholder="gas limit"  />
+                    placeholder="Gas Limit"  />
                   </InputGroup>
+
                   </Modal.Body>
                   <Modal.Footer>
                     <Button variant="secondary" onClick={()=>this.closeModal()}>
